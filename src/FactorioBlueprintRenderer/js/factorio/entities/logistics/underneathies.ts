@@ -1,6 +1,6 @@
 export default function(): EntityImageMap {
 
-    function prepareUndergroundBeltData(beltPrefix, beltImageColumns, beltAnimationSpeed) {
+    function prepareUndergroundBeltData(beltPrefix: string, beltImageColumns: number, beltAnimationSpeed: number): EntityImage {
         return {
             types:    {
                 output: {
