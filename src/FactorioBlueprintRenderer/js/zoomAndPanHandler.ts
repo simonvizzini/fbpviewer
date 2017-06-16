@@ -1,20 +1,27 @@
-class ZoomAndPanHandler {
-    constructor(keyboardHandler) {
-        this.keyboardHandler =          keyboardHandler;
-        this.MAX_SCALE =                3;
-        this.minScale =                 1;
-        this.pixiContainer =            null;
-        this.lastPosition =             null;
-        this.canvasWidth =              0;
-        this.canvasHeight =             0;
-        this.pixiContainerWidth =       0;
-        this.pixiContainerHeight =      0;
+import { IKeyboardHandler } from "./keyboardHandler";
+
+type MouseListenerCallback = (x: number, y: number) => void;
+
+export default class ZoomAndPanHandler {
+    private MAX_SCALE =                             3;
+    private minScale =                              1;
+    private lastPosition: { x: number, y: number } | null;
+    private canvasWidth =                           0;
+    private canvasHeight =                          0;
+    private pixiContainerWidth =                    0;
+    private pixiContainerHeight =                   0;
+    private movedBy =                               0;
+    private moved: boolean;
+    private pixiContainer: PIXI.Container;
+    private keyboardHandler: IKeyboardHandler;
+    private onMouseClickListener: MouseListenerCallback;
+    private onMousePositionChanged: MouseListenerCallback;
+
+    constructor(keyboardHandler: IKeyboardHandler) {
+        this.keyboardHandler = keyboardHandler;
     }
-    onMousePositionChanged(x, y) {
-    }
-    onMouseClickListener(x, y) {
-    }
-    zoom(zoomMultiplier, x, y) {
+
+    zoom(zoomMultiplier: number, x: number, y: number) {
         var worldPosition = this.getWorldPosition(x, y);
         this.pixiContainer.scale.x *= zoomMultiplier;
         this.pixiContainer.scale.y *= zoomMultiplier;
@@ -27,6 +34,7 @@ class ZoomAndPanHandler {
         this.pixiContainer.y -= newScreenPosition.y - y;
         this.clampPosition();
     }
+
     clampZoom() {
         if (this.pixiContainer.scale.x > this.MAX_SCALE) {
             this.pixiContainer.scale.x = this.MAX_SCALE;
@@ -41,6 +49,7 @@ class ZoomAndPanHandler {
             this.pixiContainer.scale.y = this.minScale;
         }
     }
+
     clampPosition() {
         if (this.pixiContainer.x > 0) {
             this.pixiContainer.x = 0;
@@ -56,17 +65,15 @@ class ZoomAndPanHandler {
         if (this.pixiContainer.y < minY) {
             this.pixiContainer.y = minY;
         }
-        var worldPosition = {
-            x: this.pixiContainer.x,
-            y: this.pixiContainer.y
-        };
     }
-    getWorldPosition(mouseX, mouseY) {
+
+    getWorldPosition(mouseX: number, mouseY: number) {
         return {
             x: (mouseX - this.pixiContainer.x) / this.pixiContainer.scale.x,
             y: (mouseY - this.pixiContainer.y) / this.pixiContainer.scale.y
         };
     }
+
     handleKeyboardPanning() {
         if (!this.pixiContainer) {
             return;
@@ -108,59 +115,69 @@ class ZoomAndPanHandler {
         //this.clampZoom();
         //this.clampPosition();
     }
-    onMouseWheel(event) {
+
+    onMouseWheel(event: JQueryMousewheel.JQueryMousewheelEventObject) {
         if (!this.pixiContainer) {
             return;
         }
         var zoomMultiplier = event.deltaY > 0 ? 1.1 : 0.9;
-        this.zoom(zoomMultiplier, event.offsetX, event.offsetY);
+        this.zoom(zoomMultiplier, event.offsetX || 0, event.offsetY || 0); // TODO: offsetX and offsetY can be apparently undefined
     }
-    onMouseDown(event) {
-        var offsetX = event.offsetX;
-        var offsetY = event.offsetY;
-        if (!offsetX) {
-            var target = event.target || e.srcElement,
-            rect = target.getBoundingClientRect(),
-            offsetX = event.clientX - rect.left,
-            offsetY = event.clientY - rect.top;
+
+    onMouseDown(event: JQuery.Event<HTMLCanvasElement>) {
+        let offsetX = event.offsetX;
+        let offsetY = event.offsetY;
+
+        if (!offsetX || !offsetY) {
+            let target = event.target;
+            let rect = target.getBoundingClientRect();
+            offsetX = (event.clientX || 0) - rect.left,
+            offsetY = (event.clientY || 0) - rect.top;
         }
         this.lastPosition = {x: offsetX, y: offsetY};
         this.movedBy = 0;
     }
-    onMouseUp(event) {
-        var offsetX = event.offsetX;
-        var offsetY = event.offsetY;
-        if (!offsetX) {
-            var target = event.target || e.srcElement,
-                rect = target.getBoundingClientRect(),
-                offsetX = event.clientX - rect.left,
-                offsetY = event.clientY - rect.top;
+
+    onMouseUp(event: JQuery.Event<HTMLCanvasElement>) {
+        let offsetX = event.offsetX;
+        let offsetY = event.offsetY;
+
+        if (!offsetX || !offsetY) {
+            let target = event.target;
+            let rect = target.getBoundingClientRect();
+            offsetX = (event.clientX || 0) - rect.left;
+            offsetY = (event.clientY || 0) - rect.top;
         }
-        var that = this;
+
         if (this.lastPosition && this.movedBy < 40) {
             var worldPosition = this.getWorldPosition(offsetX, offsetY);
-            setTimeout(function () {
-                that.onMouseClickListener(Math.round(worldPosition.x), Math.round(worldPosition.y));
+            setTimeout(() => {
+                this.onMouseClickListener(Math.round(worldPosition.x), Math.round(worldPosition.y));
             }, 100);
         }
         this.lastPosition = null;
     }
-    onMouseOut(event) {
+
+    onMouseOut(/*event: JQuery.Event<HTMLCanvasElement>*/) {
         this.lastPosition = null;
         this.moved = true;
     }
-    onMouseMove(event) {
-        var offsetX = event.offsetX;
-        var offsetY = event.offsetY;
-        if (!offsetX) {
-            var target = event.target || e.srcElement,
-                rect = target.getBoundingClientRect(),
-                offsetX = event.clientX - rect.left,
-                offsetY = event.clientY - rect.top;
+
+    onMouseMove(event: JQuery.Event<HTMLCanvasElement>) {
+        let offsetX = event.offsetX;
+        let offsetY = event.offsetY;
+
+        if (!offsetX || ! offsetY) {
+            let target = event.target;
+            let rect = target.getBoundingClientRect();
+            offsetX = (event.clientX || 0) - rect.left,
+            offsetY = (event.clientY || 0) - rect.top;
         }
+
         if (!this.pixiContainer) {
             return;
         }
+
         if (this.lastPosition) {
             this.movedBy += Math.pow(offsetX - this.lastPosition.x, 2) + Math.pow(offsetY - this.lastPosition.y, 2);
             this.pixiContainer.x += (offsetX - this.lastPosition.x);
@@ -168,31 +185,39 @@ class ZoomAndPanHandler {
             this.lastPosition = {x: offsetX, y: offsetY};
             this.clampPosition();
         }
-        var worldPosition = this.getWorldPosition(event.offsetX, event.offsetY);
+
+        let worldPosition = this.getWorldPosition(offsetX, offsetY);
         this.onMousePositionChanged(Math.round(worldPosition.x), Math.round(worldPosition.y));
     }
-    onHammerPinch(event) {
+
+    onHammerPinch(event: HammerInput) {
         this.zoom(Math.pow(event.scale, 0.05), event.center.x, event.center.y);
     }
-    setContainer(container, keepPosition) {
+
+    setContainer(container: PIXI.Container, keepPosition: boolean) {
         this.minScale = container.scale.x;
         this.pixiContainerWidth = container.width / container.scale.x;
         this.pixiContainerHeight = container.height / container.scale.y;
+
         if (keepPosition && this.pixiContainer) {
             container.x = this.pixiContainer.x;
             container.y = this.pixiContainer.y;
             container.scale.x = this.pixiContainer.scale.x;
             container.scale.y = this.pixiContainer.scale.y;
         }
+
         this.pixiContainer = container;
     }
-    setOnMousePositionChanged(listener) {
+
+    setOnMousePositionChanged(listener: MouseListenerCallback) {
         this.onMousePositionChanged = listener;
     }
-    setOnMouseClickListener(listener) {
+
+    setOnMouseClickListener(listener: MouseListenerCallback) {
         this.onMouseClickListener = listener;
     }
-    init(canvas) {
+
+    init(canvas: HTMLCanvasElement) {
         $(canvas).mousewheel(this.onMouseWheel.bind(this));
         $(canvas).on('vmousedown', this.onMouseDown.bind(this));
         $(canvas).on('vmouseup', this.onMouseUp.bind(this));
@@ -205,5 +230,3 @@ class ZoomAndPanHandler {
         this.canvasHeight = canvas.height;
     }
 }
-
-module.exports = ZoomAndPanHandler;

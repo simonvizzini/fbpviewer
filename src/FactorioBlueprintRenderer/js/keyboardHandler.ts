@@ -1,7 +1,14 @@
 type PressedKeysMap = { [key: string]: boolean }
 
-export default class KeyboardHandler {
-    static keys = {
+export interface IKeyboardHandler {
+    keys: { [key: string]: number };
+    downHandler(event: JQuery.Event): void;
+    upHandler(event: JQuery.Event): void;
+    isPressed(keyCode: number): boolean;
+}
+
+export default class KeyboardHandler implements IKeyboardHandler {
+    keys = {
         alt:        18,
         W:          87,
         A:          65,
@@ -28,7 +35,7 @@ export default class KeyboardHandler {
         this.pressedKeys[event.which] = false;
     }
 
-    isPressed(keyCode: string) {
+    isPressed(keyCode: number) {
         return this.pressedKeys[keyCode] || false;
     }
 }
