@@ -27,6 +27,20 @@
     "seedrandom": "^2.4.3"
   },
   "devDependencies": {
+    "@types/bootstrap": "^3.3.34",
+    "@types/hammerjs": "^2.0.34",
+    "@types/highlight.js": "^9.1.9",
+    "@types/jquery": "^3.2.1",
+    "@types/jquery-mousewheel": "^3.1.6",
+    "@types/lodash.foreach": "^4.5.2",
+    "@types/lodash.includes": "^4.3.2",
+    "@types/lodash.merge": "^4.6.2",
+    "@types/node": "^7.0.31",
+    "@types/pako": "^1.0.0",
+    "@types/pixi.js": "^4.5.0",
+    "@types/seedrandom": "^2.4.27",
+    "ts-loader": "^2.1.0",
+    "typescript": "^2.3.4",
     "webpack": "^2.6.1"
   }
 }

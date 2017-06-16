@@ -1,12 +1,14 @@
-class AnimationHandler {
-    constructor() {
-        this.onSecondTickListeners =   [];
-        this.currentFrame =            0;
-        this.currentSecond =           0;
-    }
+type ListenerCallback = (currentSecond: number) => void;
+
+export default class AnimationHandler {
+    onSecondTickListeners: ListenerCallback[] =         [];
+    currentFrame =                                      0;
+    currentSecond =                                     0;
+
     clear() {
         this.onSecondTickListeners = [];
     }
+
     tick() {
         this.currentFrame++;
         if (this.currentFrame === 60) {
@@ -17,9 +19,8 @@ class AnimationHandler {
             this.currentFrame = 0;
         }
     }
-    addOnSecondTickListener(listener) {
+
+    addOnSecondTickListener(listener: ListenerCallback) {
         this.onSecondTickListeners.push(listener);
     }
 }
-
-module.exports = AnimationHandler;

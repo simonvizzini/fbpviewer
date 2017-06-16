@@ -1,9 +1,12 @@
 const forEach = require("lodash.foreach");
 
-class IconCropper {
-    init(domContainer) {
-        this.renderer = PIXI.autoDetectRenderer(32, 32, {antialias: true, forceFXAA: true});
-        this.renderer.backgroundColor = 0xFFFFFF;
+export default class IconCropper {
+    renderer: PIXI.WebGLRenderer | PIXI.CanvasRenderer;
+    stage: PIXI.Container;
+
+    init(domContainer: HTMLElement) {
+        this.renderer = PIXI.autoDetectRenderer(32, 32, ({antialias: true, forceFXAA: true} as PIXI.WebGLRendererOptions));
+        // this.renderer.backgroundColor = 0xFFFFFF;
 
         domContainer.appendChild(this.renderer.view);
 
@@ -28,5 +31,3 @@ class IconCropper {
         return src;
     }
 }
-
-module.exports = IconCropper;
