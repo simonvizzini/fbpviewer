@@ -1,8 +1,8 @@
-module.exports = function () {
+export default function(): EntityImageMap {
 
     const TILE_SIZE = 32;
 
-    function createPumpjackImage(number, arrowRotation, arrowX, arrowY) {
+    function createPumpjackImage(number: number, arrowRotation: number, arrowX: number, arrowY: number): Image {
         return {
             type:   'container',
             images: [
@@ -36,7 +36,7 @@ module.exports = function () {
         };
     }
 
-    function createRefineryImage(number, rotation, arrows) {
+    function createRefineryImage(number: number, rotation: number, arrows: {x: number, y:number}[]): Image {
         return {
             type:   'container',
             images: [
@@ -94,7 +94,6 @@ module.exports = function () {
     }
 
     return {
-
         'chemical-plant': {
             directions: {
                 2: {

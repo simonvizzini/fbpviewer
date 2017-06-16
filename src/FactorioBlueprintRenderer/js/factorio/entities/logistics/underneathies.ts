@@ -1,4 +1,4 @@
-module.exports = function () {
+export default function(): EntityImageMap {
 
     function prepareUndergroundBeltData(beltPrefix, beltImageColumns, beltAnimationSpeed) {
         return {

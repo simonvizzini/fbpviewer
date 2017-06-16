@@ -1,4 +1,4 @@
-exports.tiles = {
+export const tiles = {
     'concrete':              {
         image: {
             type: 'random_trim',

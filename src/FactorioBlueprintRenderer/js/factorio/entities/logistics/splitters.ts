@@ -1,6 +1,6 @@
-module.exports = function () {
+export default function(): EntityImageMap {
 
-    function prepareSplitterData(beltPrefix, beltImageColumns, beltAnimationSpeed) {
+    function prepareSplitterData(beltPrefix: string, beltImageColumns: number, beltAnimationSpeed: number): EntityImage {
         return {
             directions: {
                 2: {

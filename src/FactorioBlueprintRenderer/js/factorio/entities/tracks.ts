@@ -1,11 +1,11 @@
-module.exports = function () {
+export default function(): EntityImageMap {
 
     const LAYER_BG = 10;
     const LAYER_PATH = 20;
     const LAYER_TIES = 30;
     const LAYER_BACKPLATES = 40;
 
-    function createTrackImage(directionName) {
+    function createTrackImage(directionName: string): Image {
         return {
             type:   'container',
             images: [
@@ -53,7 +53,7 @@ module.exports = function () {
         };
     }
 
-    function createCurvedTrackImage(directionName) {
+    function createCurvedTrackImage(directionName: string): Image {
         return {
             type:   'container',
             images: [
@@ -89,7 +89,7 @@ module.exports = function () {
         };
     }
 
-    function createStationImage(number) {
+    function createStationImage(number: number): Image {
         return {
             type:   'container',
             images: [
@@ -134,7 +134,7 @@ module.exports = function () {
         };
     }
 
-    function createRailChainSignalImage(number) {
+    function createRailChainSignalImage(number: number): Image {
         return {
             type:   'trim',
             path:   'entity/rail-chain-signal/rail-chain-signal.png',
@@ -144,7 +144,7 @@ module.exports = function () {
         }
     }
 
-    function createRailSignalImage(number) {
+    function createRailSignalImage(number: number): Image {
         return {
             type:   'trim',
             path:   'entity/rail-signal/rail-signal.png',

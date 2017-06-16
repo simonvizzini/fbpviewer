@@ -1,5 +1,5 @@
-module.exports = function () {
-    function prepareInserterData(inserterName) {
+export default function(): EntityImageMap {
+    function prepareInserterData(inserterName: string): EntityImage {
         return {
             directions: {
                 2: {

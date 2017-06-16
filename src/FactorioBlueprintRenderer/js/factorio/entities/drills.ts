@@ -1,4 +1,4 @@
-module.exports = function () {
+export default function(): EntityImageMap {
     return {
         'burner-mining-drill':   {
             directions: {
@@ -74,7 +74,7 @@ module.exports = function () {
                         ]
                     }
                 },
-                8: {}
+                8: {} // Check whats up with this
             },
             image:      {
                 type:   'container',

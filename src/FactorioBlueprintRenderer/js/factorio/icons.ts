@@ -1,7 +1,7 @@
 const forEach = require("lodash.foreach");
 
-exports.iconSize = 32;
-exports.icons = (function () {
+export const iconSize = 32;
+export const icons = (() => {
     const OVERLAY_LAYER = 200;
 
     var items = [
@@ -220,17 +220,24 @@ exports.icons = (function () {
         "lubricant":     {r: 0.15, g: 0.32, b: 0.03}
     };
 
-    var gases = {
-        steam: {r: 0, g: 0.34, b: 0.6}
-    };
+    // unused
+    // var gases = {
+    //     steam: {r: 0, g: 0.34, b: 0.6}
+    // };
 
     var signalColors = [
         'black', 'blue', 'cyan', 'green', 'grey', 'pink', 'red', 'white', 'yellow'
     ];
 
-    var allIcons = {};
 
-    forEach(items, function (itemName) {
+
+    type Icon = {
+        image: Image
+    }
+
+    var allIcons: { [name: string]: Icon } = {};
+
+    forEach(items, (itemName: string) => {
         allIcons[itemName] = {
             image: {
                 type:   'sprite',
@@ -243,7 +250,7 @@ exports.icons = (function () {
         };
     });
 
-    forEach(itemsWithSpecialNames, function (imageName, itemName) {
+    forEach(itemsWithSpecialNames, (imageName: string, itemName: string) {
         allIcons[itemName] = {
             image: {
                 type:   'sprite',
@@ -256,7 +263,7 @@ exports.icons = (function () {
         };
     });
 
-    forEach(recipes, function (iconName, recipeName) {
+    forEach(recipes, (iconName: string, recipeName: string) => {
         allIcons[recipeName] = {
             image: {
                 type:   'sprite',
@@ -269,7 +276,7 @@ exports.icons = (function () {
         };
     });
 
-    forEach(fluids, function (fluidDetails, fluidName) {
+    forEach(fluids, (_: string, fluidName: string) => {
         allIcons[fluidName] = {
             image: {
                 type:   'sprite',
@@ -363,7 +370,7 @@ exports.icons = (function () {
                 }
             };
         }
-        forEach(signalColors, function (color) {
+        forEach(signalColors, (color: string) => {
             allIcons['signal-' + color] = {
                 image: {
                     type:   'sprite',

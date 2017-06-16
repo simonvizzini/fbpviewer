@@ -1,6 +1,6 @@
-module.exports = function () {
+export default function(): EntityImageMap {
 
-    function prepareTransportBeltData(beltName, imageColumns, animationSpeed) {
+    function prepareTransportBeltData(beltName: string, imageColumns: number, animationSpeed: number): EntityImage {
         return {
             directions: {
                 2: {
