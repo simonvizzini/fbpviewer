@@ -18,7 +18,7 @@ export interface IFactorioBlueprintReader {
     stringify(blueprintData: any): string;
 }
 
-export class FactorioBlueprintReader implements IFactorioBlueprintReader {
+export default class FactorioBlueprintReader implements IFactorioBlueprintReader {
     iconSize = iconSize;
     icons = icons;
     tiles = tiles;

@@ -207,7 +207,7 @@ export default class ZoomAndPanHandler implements IZoomAndPanHandler {
         this.zoom(Math.pow(event.scale, 0.05), event.center.x, event.center.y);
     }
 
-    setContainer(container: PIXI.Container, keepPosition: boolean) {
+    setContainer(container: PIXI.Container, keepPosition?: boolean) {
         this.minScale = container.scale.x;
         this.pixiContainerWidth = container.width / container.scale.x;
         this.pixiContainerHeight = container.height / container.scale.y;

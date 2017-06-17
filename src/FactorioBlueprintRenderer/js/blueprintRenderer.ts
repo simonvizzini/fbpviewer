@@ -9,11 +9,6 @@ import { IAnimationHandler } from "./animationHandler";
 import { IZoomAndPanHandler } from "./zoomAndPanHandler";
 import { IKeyboardHandler } from "./keyboardHandler";
 
-const FBR_IMAGES_PREFIX = (window as any)["FBR_IMAGES_PREFIX"];
-const FBR_PIXELS_PER_TILE = (window as any)["FBR_PIXELS_PER_TILE"];
-const FBR_CANVAS_WIDTH = (window as any)["FBR_CANVAS_WIDTH"];
-const FBR_CANVAS_HEIGHT = (window as any)["FBR_CANVAS_HEIGHT"];
-
 export default class BlueprintRenderer {
     private DEFAULT_LAYER = 100;
     private OVERLAY_LAYER = 200;
@@ -57,22 +52,22 @@ export default class BlueprintRenderer {
         var layerSprites: Dict<PIXI.Sprite> = {};
 
         if (entityImageSpec.type == 'sprite') {
-            layerSprites[entityImageSpec.layer || this.DEFAULT_LAYER] = new PIXI.Sprite(PIXI.Texture.fromFrame(FBR_IMAGES_PREFIX + entityImageSpec.path));
+            layerSprites[entityImageSpec.layer || this.DEFAULT_LAYER] = new PIXI.Sprite(PIXI.Texture.fromFrame(window.FBR_IMAGES_PREFIX + entityImageSpec.path));
         } else if (entityImageSpec.type == 'trim') {
-            layerSprites[entityImageSpec.layer || this.DEFAULT_LAYER] = new PIXI.Sprite(PIXI.Texture.fromFrame(FBR_IMAGES_PREFIX + entityImageSpec.path + "." + entityImageSpec.number));
+            layerSprites[entityImageSpec.layer || this.DEFAULT_LAYER] = new PIXI.Sprite(PIXI.Texture.fromFrame(window.FBR_IMAGES_PREFIX + entityImageSpec.path + "." + entityImageSpec.number));
         } else if (entityImageSpec.type == 'random_trim') {
             var number = this.getRandomInt(entityImageSpec.from as number, entityImageSpec.to as number);
-            layerSprites[entityImageSpec.layer || this.DEFAULT_LAYER] = new PIXI.Sprite(PIXI.Texture.fromFrame(FBR_IMAGES_PREFIX + entityImageSpec.path + "." + number));
+            layerSprites[entityImageSpec.layer || this.DEFAULT_LAYER] = new PIXI.Sprite(PIXI.Texture.fromFrame(window.FBR_IMAGES_PREFIX + entityImageSpec.path + "." + number));
         } else if (entityImageSpec.type == 'animated') {
             var frames = [];
             for (var i = entityImageSpec.from as number; i <= (entityImageSpec.to as number); i++) {
-                frames.push(PIXI.Texture.fromFrame(FBR_IMAGES_PREFIX + entityImageSpec.path + "." + i));
-                //frames.push(PIXI.utils.TextureCache[FBR_IMAGES_PREFIX + entityImageSpec.path + "." + i]);
+                frames.push(PIXI.Texture.fromFrame(window.FBR_IMAGES_PREFIX + entityImageSpec.path + "." + i));
+                //frames.push(PIXI.utils.TextureCache[window.FBR_IMAGES_PREFIX + entityImageSpec.path + "." + i]);
             }
             if (entityImageSpec.reverse) {
                 for (var j = entityImageSpec.to as number; j >= (entityImageSpec.from as number); j--) {
-                    frames.push(PIXI.Texture.fromFrame(FBR_IMAGES_PREFIX + entityImageSpec.path + "." + j));
-                    //frames.push(PIXI.utils.TextureCache[FBR_IMAGES_PREFIX + entityImageSpec.path + "." + j]);
+                    frames.push(PIXI.Texture.fromFrame(window.FBR_IMAGES_PREFIX + entityImageSpec.path + "." + j));
+                    //frames.push(PIXI.utils.TextureCache[window.FBR_IMAGES_PREFIX + entityImageSpec.path + "." + j]);
                 }
             }
             var sprite = new PIXI.extras.AnimatedSprite(frames);
@@ -133,8 +128,8 @@ export default class BlueprintRenderer {
 
     drawLayers(destinationLayers: Dict<PIXI.Container>, sourceLayers: Dict<PIXI.Sprite | PIXI.Graphics>, gridX: number, gridY: number, xOffset: number, yOffset: number) {
         forEach(sourceLayers, (spriteLayer: PIXI.Sprite, layerNumber: number) => {
-            spriteLayer.x = gridX * FBR_PIXELS_PER_TILE + xOffset;
-            spriteLayer.y = gridY * FBR_PIXELS_PER_TILE + yOffset;
+            spriteLayer.x = gridX * window.FBR_PIXELS_PER_TILE + xOffset;
+            spriteLayer.y = gridY * window.FBR_PIXELS_PER_TILE + yOffset;
             destinationLayers[layerNumber] = destinationLayers[layerNumber] || new PIXI.Container();
             destinationLayers[layerNumber].addChild(spriteLayer);
         });
@@ -142,7 +137,7 @@ export default class BlueprintRenderer {
 
     createIconSprite(imageSpec: Image) {
         var iconLayers = this.createEntityLayers(imageSpec);
-        var darkBackground = new PIXI.Sprite(PIXI.Texture.fromFrame(FBR_IMAGES_PREFIX + this.factorioBlueprintReader.ImagesUI.INFO_DARK_BACKGROUND));
+        var darkBackground = new PIXI.Sprite(PIXI.Texture.fromFrame(window.FBR_IMAGES_PREFIX + this.factorioBlueprintReader.ImagesUI.INFO_DARK_BACKGROUND));
         darkBackground.anchor.x = 0.5;
         darkBackground.anchor.y = 0.5;
         iconLayers[this.OVERLAY_LAYER - 10] = darkBackground;
@@ -163,7 +158,7 @@ export default class BlueprintRenderer {
             var sprite = new PIXI.Graphics();
             sprite.beginFill(0xFFFFFF);
             sprite.lineStyle(1, 0x000000);
-            sprite.drawRect(0, 0, FBR_PIXELS_PER_TILE, FBR_PIXELS_PER_TILE);
+            sprite.drawRect(0, 0, window.FBR_PIXELS_PER_TILE, window.FBR_PIXELS_PER_TILE);
             spriteLayers[this.DEFAULT_LAYER] = sprite;
             sizeW = 1;
             sizeH = 1;
@@ -187,8 +182,8 @@ export default class BlueprintRenderer {
                 console.log('Can\'t find icon for recipe', entity.recipe);
             } else {
                 var iconLayers = this.createIconSprite(this.factorioBlueprintReader.icons[entity.recipe].image as Image);
-                xOffset = (sizeW * FBR_PIXELS_PER_TILE) / 2;
-                yOffset = (sizeH * FBR_PIXELS_PER_TILE) / 2;
+                xOffset = (sizeW * window.FBR_PIXELS_PER_TILE) / 2;
+                yOffset = (sizeH * window.FBR_PIXELS_PER_TILE) / 2;
                 this.drawLayers(layers, iconLayers, gridX, gridY, xOffset, yOffset);
             }
         }
@@ -200,7 +195,7 @@ export default class BlueprintRenderer {
                 // i.e. either [{name: 'blabla', count:5}] or just {blabla:5}
                 itemCount += entityItem.count ? entityItem.count : entityItem;
             });
-            var startX = (sizeW * FBR_PIXELS_PER_TILE - itemCount * this.factorioBlueprintReader.iconSize / 2) / 2;
+            var startX = (sizeW * window.FBR_PIXELS_PER_TILE - itemCount * this.factorioBlueprintReader.iconSize / 2) / 2;
             // add another half of icon size (which is uses scale 0.5, so a quarter of size) due to anchor being 0.5
             startX += this.factorioBlueprintReader.iconSize / 4;
             var itemNumber = 0;
@@ -221,7 +216,7 @@ export default class BlueprintRenderer {
                             layerContainer.scale.x = layerContainer.scale.y = 0.5;
                         });
                         xOffset = startX + this.factorioBlueprintReader.iconSize / 2 * itemNumber;
-                        yOffset = (sizeH * FBR_PIXELS_PER_TILE) / 2 + this.factorioBlueprintReader.iconSize;
+                        yOffset = (sizeH * window.FBR_PIXELS_PER_TILE) / 2 + this.factorioBlueprintReader.iconSize;
                         this.drawLayers(layers, iconLayers, gridX, gridY, xOffset, yOffset);
                     }
                     itemNumber++;
@@ -262,7 +257,7 @@ export default class BlueprintRenderer {
 
     }
 
-    renderBlueprint(pixiRenderer: any, stage: any, blueprintData: any) {
+    renderBlueprint(/*pixiRenderer: any, stage: any,*/ blueprintData: any) {
         var entities = blueprintData.blueprint.entities || [];
         var tiles = blueprintData.blueprint.tiles || [];
 
@@ -301,12 +296,12 @@ export default class BlueprintRenderer {
         maxXY += 5;
 
         var sizeXY = maxXY - minXY;
-        var minScale = Math.min(1, FBR_CANVAS_WIDTH / (sizeXY * FBR_PIXELS_PER_TILE), FBR_CANVAS_HEIGHT / (sizeXY * FBR_PIXELS_PER_TILE));
+        var minScale = Math.min(1, window.FBR_CANVAS_WIDTH / (sizeXY * window.FBR_PIXELS_PER_TILE), window.FBR_CANVAS_HEIGHT / (sizeXY * window.FBR_PIXELS_PER_TILE));
 
         var blueprintContainer = new PIXI.Container();
         blueprintContainer.scale.x = blueprintContainer.scale.y = minScale;
 
-        var background = new PIXI.extras.TilingSprite(PIXI.Texture.fromFrame(FBR_IMAGES_PREFIX + this.factorioBlueprintReader.ImagesUI.BACKGROUND), FBR_CANVAS_WIDTH / minScale, FBR_CANVAS_HEIGHT / minScale);
+        var background = new PIXI.extras.TilingSprite(PIXI.Texture.fromFrame(window.FBR_IMAGES_PREFIX + this.factorioBlueprintReader.ImagesUI.BACKGROUND), window.FBR_CANVAS_WIDTH / minScale, window.FBR_CANVAS_HEIGHT / minScale);
         blueprintContainer.addChild(background);
 
         var isX0InHalfGrid = false;
@@ -341,13 +336,13 @@ export default class BlueprintRenderer {
                 spriteLayers = new PIXI.Graphics();
                 spriteLayers.beginFill(0xFFFFFF);
                 spriteLayers.lineStyle(1, 0x333333);
-                spriteLayers.drawRect(0, 0, FBR_PIXELS_PER_TILE, FBR_PIXELS_PER_TILE);
+                spriteLayers.drawRect(0, 0, window.FBR_PIXELS_PER_TILE, window.FBR_PIXELS_PER_TILE);
             }
             var gridX = Math.floor(entity.position.x - minXY - (isX0InHalfGrid ? 1 : 0));
             var gridY = Math.floor(entity.position.y - minXY - (isY0InHalfGrid ? 1 : 0));
             forEach(spriteLayers, (sprite: PIXI.Sprite) => {
-                sprite.x = gridX * FBR_PIXELS_PER_TILE;
-                sprite.y = gridY * FBR_PIXELS_PER_TILE;
+                sprite.x = gridX * window.FBR_PIXELS_PER_TILE;
+                sprite.y = gridY * window.FBR_PIXELS_PER_TILE;
                 blueprintContainer.addChild(sprite);
             });
         });
@@ -381,8 +376,8 @@ export default class BlueprintRenderer {
             }
             var gridX = Math.floor(entity.position.x - minXY - sizeW / 2);
             var gridY = Math.floor(entity.position.y - minXY - sizeH / 2);
-            var x = gridX * FBR_PIXELS_PER_TILE;
-            var y = gridY * FBR_PIXELS_PER_TILE;
+            var x = gridX * window.FBR_PIXELS_PER_TILE;
+            var y = gridY * window.FBR_PIXELS_PER_TILE;
 
 
             var xOffset = 16;
@@ -391,8 +386,8 @@ export default class BlueprintRenderer {
                 xOffset = entityDrawingSpec.circuitEndpoints[circuitId].x;
                 yOffset = entityDrawingSpec.circuitEndpoints[circuitId].y;
             } else if (entityDrawingSpec) {
-                xOffset = FBR_PIXELS_PER_TILE * (entityDrawingSpec.gridSize as Size).w / 2;
-                yOffset = FBR_PIXELS_PER_TILE * (entityDrawingSpec.gridSize as Size).h / 2;
+                xOffset = window.FBR_PIXELS_PER_TILE * (entityDrawingSpec.gridSize as Size).w / 2;
+                yOffset = window.FBR_PIXELS_PER_TILE * (entityDrawingSpec.gridSize as Size).h / 2;
             }
 
             return {x: x + xOffset, y: y + yOffset};
@@ -437,8 +432,8 @@ export default class BlueprintRenderer {
 
 
         this.zoomAndPanHandler.setOnMouseClickListener((x, y) => {
-            x = Math.floor(x / FBR_PIXELS_PER_TILE);
-            y = Math.floor(y / FBR_PIXELS_PER_TILE);
+            x = Math.floor(x / window.FBR_PIXELS_PER_TILE);
+            y = Math.floor(y / window.FBR_PIXELS_PER_TILE);
             /*$.each(tiles, function (key, entity) {
              var gridX = Math.floor(entity.position.x - minXY - 0.5);
              var gridY = Math.floor(entity.position.y - minXY - 0.5);
@@ -484,5 +479,3 @@ export default class BlueprintRenderer {
         return blueprintContainer;
     }
 }
-
-module.exports = BlueprintRenderer;

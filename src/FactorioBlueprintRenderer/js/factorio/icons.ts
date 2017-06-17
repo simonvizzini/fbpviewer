@@ -244,7 +244,7 @@ export const icons = ((): EntityImageMap => {
         };
     });
 
-    forEach(itemsWithSpecialNames, (imageName: string, itemName: string) {
+    forEach(itemsWithSpecialNames, (imageName: string, itemName: string) => {
         allIcons[itemName] = {
             image: {
                 type:   'sprite',

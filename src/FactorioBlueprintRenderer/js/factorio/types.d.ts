@@ -24,7 +24,7 @@ type Image = {
 type EntityImage = {
     image?:      Image;
     types?:      EntityImageMap;
-    directions?: { [dir: number]: EntityImage | {} };
+    directions?: { [dir: number]: EntityImage };
     gridSize?:   Size;
     offset?:     Coords;
     circuitEndpoints?: EntityCircuitEndpoints;
@@ -54,4 +54,16 @@ type Size = {
 
 type Dict<T> = {
     [key: string]: T;
+}
+
+interface Window {
+    FBR_IMAGES_PREFIX: string;
+    FBR_PIXELS_PER_TILE: number;
+    Hammer: HammerStatic;
+    FBR_CANVAS_WIDTH: number;
+    FBR_CANVAS_HEIGHT: number;
+    FBR_INITIAL_BLUEPRINT: string;
+    FBR_REDRAW_FUNC(): void;
+    $: JQueryStatic;
+    jQuery: JQueryStatic
 }

@@ -1,8 +1,8 @@
-const forEach = require("lodash.foreach");
+import forEach = require("lodash.foreach");
 
 export interface IIconCropper {
     init(domContainer: HTMLElement): void;
-    createIconURL(spriteLayers: any[]): string;
+    createIconURL(spriteLayers: Dict<PIXI.Sprite>): string;
 }
 
 export default class IconCropper implements IIconCropper {
@@ -20,7 +20,7 @@ export default class IconCropper implements IIconCropper {
         $(this.renderer.view).hide();
     }
 
-    createIconURL(spriteLayers: any[]) {
+    createIconURL(spriteLayers: Dict<PIXI.Sprite>) {
         var tmpContainer = new PIXI.Container();
         forEach(spriteLayers, function(sprite: any) {
             tmpContainer.addChild(sprite);
