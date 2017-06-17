@@ -42,7 +42,7 @@ export default class FactorioBlueprintReader implements IFactorioBlueprintReader
         blueprintString = blueprintString.substr(1);
         blueprintString = atob(blueprintString); // base64 decode
         blueprintString = pako.inflate(blueprintString, {to: 'string'});
-        var blueprintData = JSON.parse(blueprintString);
+        var blueprintData: BlueprintData = JSON.parse(blueprintString);
         return {data: blueprintData, version: version};
     }
 

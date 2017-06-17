@@ -119,10 +119,8 @@ export default class ZoomAndPanHandler implements IZoomAndPanHandler {
             this.zoom(1.01, this.canvasWidth / 2, this.canvasHeight / 2);
         }
 
-        // Had to disable this due to weird pixi exceptions, couldn't figure out whats wrong,
-        // this.pixiContainer.scale fails because transform is null
-        //this.clampZoom();
-        //this.clampPosition();
+        this.clampZoom();
+        this.clampPosition();
     }
 
     private onMouseWheel(event: JQueryMousewheel.JQueryMousewheelEventObject) {

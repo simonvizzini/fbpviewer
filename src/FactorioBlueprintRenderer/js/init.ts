@@ -134,7 +134,7 @@ $(function () {
                 factorioBlueprintReader.loadEntities();
                 if (blueprintData.data.blueprint) {
                     $("#blueprint-recipe-selector").hide();
-                    blueprintContainer = blueprintRenderer.renderBlueprint(/*renderer, stage,*/ blueprintData.data);
+                    blueprintContainer = blueprintRenderer.renderBlueprint(/*renderer, stage,*/ (blueprintData.data as BlueprintBookEntry));
                 } else if (blueprintData.data.blueprint_book) {
                     $("#blueprint-recipe-selector").show();
                     blueprintContainer = blueprintRenderer.renderBlueprint(/*renderer, stage,*/ blueprintData.data.blueprint_book.blueprints[currentBlueprintIndex]);
@@ -147,7 +147,7 @@ $(function () {
                                 var signalName = icon.signal.name;
                                 if (factorioBlueprintReader.icons[signalName]) {
                                     var imageSpec = factorioBlueprintReader.icons[signalName].image;
-                                    var iconSprites = blueprintRenderer.createEntityLayers(imageSpec as Image, {});
+                                    var iconSprites = blueprintRenderer.createEntityLayers(imageSpec as Image);
                                     var iconSrc = iconCropper.createIconURL(iconSprites);
                                     icons += '<img src="' + iconSrc + '" />';
                                     continue;
@@ -216,7 +216,7 @@ $(function () {
                                 alert("Failed parsing the blueprint!");
                                 return;
                             }
-                            if (blueprintData.data.blueprint_book && blueprintData.data.blueprint_book.length == 0) {
+                            if (blueprintData.data.blueprint_book && blueprintData.data.blueprint_book.blueprints.length == 0) {
                                 alert("You can't import an empty book!");
                                 return;
                             }

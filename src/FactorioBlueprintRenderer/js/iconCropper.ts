@@ -22,7 +22,7 @@ export default class IconCropper implements IIconCropper {
 
     createIconURL(spriteLayers: Dict<PIXI.Sprite>) {
         var tmpContainer = new PIXI.Container();
-        forEach(spriteLayers, function(sprite: any) {
+        forEach(spriteLayers, (sprite) => {
             tmpContainer.addChild(sprite);
         });
         tmpContainer.x = 16;

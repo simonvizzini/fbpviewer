@@ -1,7 +1,7 @@
-const forEach = require("lodash.foreach");
-const merge = require("lodash.merge");
+import forEach = require("lodash.foreach");
+import merge = require("lodash.merge");
 const BootstrapDialog = require("bootstrap3-dialog");
-const hljs = require("highlight.js");
+import hljs = require("highlight.js");
 const ColorFillShader = require("./pixi/createColorFillShader.js");
 
 import { IFactorioBlueprintReader } from "./factorioBlueprintReader";
@@ -33,7 +33,7 @@ export default class BlueprintRenderer {
         return a < 0 && b < 0 || a >= 0 && b >= 0 ? C : -C - 1;
     }
 
-    getEntityDrawingSpecForEntity(entity: any) {
+    getEntityDrawingSpecForEntity(entity: BlueprintEntity) {
         var entityDrawingSpec = this.factorioBlueprintReader.entities[entity.name];
         if (!entityDrawingSpec) {
             return null;
@@ -48,7 +48,7 @@ export default class BlueprintRenderer {
         return entityDrawingSpec;
     }
 
-    createEntityLayers(entityImageSpec: Image, entitySpec?: any) {
+    createEntityLayers(entityImageSpec: Image, entitySpec?: any) { // figure out what is entitySpec
         var layerSprites: Dict<PIXI.Sprite> = {};
 
         if (entityImageSpec.type == 'sprite') {
@@ -127,7 +127,7 @@ export default class BlueprintRenderer {
     }
 
     drawLayers(destinationLayers: Dict<PIXI.Container>, sourceLayers: Dict<PIXI.Sprite | PIXI.Graphics>, gridX: number, gridY: number, xOffset: number, yOffset: number) {
-        forEach(sourceLayers, (spriteLayer: PIXI.Sprite, layerNumber: number) => {
+        forEach(sourceLayers, (spriteLayer: PIXI.Sprite, layerNumber: string) => {
             spriteLayer.x = gridX * window.FBR_PIXELS_PER_TILE + xOffset;
             spriteLayer.y = gridY * window.FBR_PIXELS_PER_TILE + yOffset;
             destinationLayers[layerNumber] = destinationLayers[layerNumber] || new PIXI.Container();
@@ -145,7 +145,7 @@ export default class BlueprintRenderer {
         return iconLayers;
     }
 
-    renderEntityToLayers(layers: Dict<PIXI.Container>, minXY: number, entity: any) {
+    renderEntityToLayers(layers: Dict<PIXI.Container>, minXY: number, entity: BlueprintEntity) {
         var spriteLayers: Dict<PIXI.Graphics | PIXI.Sprite> = {};
         var sizeW = 0;
         var sizeH = 0;
@@ -190,19 +190,19 @@ export default class BlueprintRenderer {
 
         if (entity.items) {
             var itemCount = 0;
-            forEach(entity.items, (entityItem: any) => {
+            forEach(entity.items, (entityItem) => {
                 // apparently items can be an array or an object
                 // i.e. either [{name: 'blabla', count:5}] or just {blabla:5}
-                itemCount += entityItem.count ? entityItem.count : entityItem;
+                itemCount += entityItem.count; // ? entityItem.count : entityItem; // check again
             });
             var startX = (sizeW * window.FBR_PIXELS_PER_TILE - itemCount * this.factorioBlueprintReader.iconSize / 2) / 2;
             // add another half of icon size (which is uses scale 0.5, so a quarter of size) due to anchor being 0.5
             startX += this.factorioBlueprintReader.iconSize / 4;
             var itemNumber = 0;
-            forEach(entity.items, (entityItem: any, itemName: string) => {
+            forEach(entity.items, (entityItem, itemName: string) => {
                 // apparently items can be an array or an object
                 // i.e. either [{name: 'blabla', count:5}] or just {blabla:5}
-                var count = entityItem;
+                var count = entityItem.count; // check again
                 if (entityItem.item) {
                     itemName = entityItem.item;
                     count = entityItem.count;
@@ -224,14 +224,14 @@ export default class BlueprintRenderer {
             });
         }
 
-        var filters: any[] = [];
+        var filters: (EntityFilter | EntityRequestFilter)[] = [];
         if (entity.filters) {
             filters = entity.filters;
         } else if (entity.request_filters) {
             filters = entity.request_filters;
         }
         var filterItemNumber = 0;
-        forEach(filters, (filterItem: any) => {
+        forEach(filters, (filterItem: EntityFilter | EntityRequestFilter) => {
             if (!this.factorioBlueprintReader.icons[filterItem.name]) {
                 console.log('Can\'t find icon for item', filterItem.name);
             } else {
@@ -257,25 +257,27 @@ export default class BlueprintRenderer {
 
     }
 
-    renderBlueprint(/*pixiRenderer: any, stage: any,*/ blueprintData: any) {
+    renderBlueprint(/*pixiRenderer: any, stage: any,*/ blueprintData: BlueprintBookEntry) {
+        // todo: figure out the shape of entities
         var entities = blueprintData.blueprint.entities || [];
         var tiles = blueprintData.blueprint.tiles || [];
 
         var minXY = 0;
         var maxXY = 0;
 
-        forEach(tiles, (entity: any) => {
+        forEach(tiles, (entity) => {
             var x = entity.position.x;
             var y = entity.position.y;
             minXY = Math.min(minXY, x, y);
             maxXY = Math.max(maxXY, x, y);
         });
 
-        var entitiesByYX: any = {};
-        var allYCoordinates: any = [];
-        forEach(entities, (entity: any, key: string) => {
-            var x = parseInt(entity.position.x);
-            var y = parseInt(entity.position.y);
+        var entitiesByYX: {[y:string]: (number[])[]} = {}; // ahem...
+        var allYCoordinates: number[] = [];
+        forEach(entities, (entity: BlueprintEntity, key: number) => {
+            // check again, apparently it's always a number already
+            var x = entity.position.x; //parseInt(entity.position.x);
+            var y = entity.position.y; //parseInt(entity.position.y);
 
             entitiesByYX[y] = entitiesByYX[y] || {};
             entitiesByYX[y][x] = entitiesByYX[y][x] || [];
@@ -319,7 +321,7 @@ export default class BlueprintRenderer {
             }
         }
 
-        forEach(tiles, (entity: any) => {
+        forEach(tiles, (entity) => {
             var spriteLayers;
             if (this.factorioBlueprintReader.tiles[entity.name]) {
                 // overwrite getRandomInt for a moment to make sure tiling stays the same every time
@@ -350,8 +352,8 @@ export default class BlueprintRenderer {
         var layers: Dict<PIXI.Container> = {};
 
         forEach(allYCoordinates, (y: number) => {
-            forEach(entitiesByYX[y], (entitiesForYX: any) => {
-                forEach(entitiesForYX, (entityKey: any) => {
+            forEach(entitiesByYX[y], (entitiesForYX: number[]) => {
+                forEach(entitiesForYX, (entityKey: number) => {
                     this.renderEntityToLayers(layers, minXY, entities[entityKey]);
                 });
             });
@@ -366,7 +368,7 @@ export default class BlueprintRenderer {
         var circuitryLayer = new PIXI.Graphics();
         circuitryLayer.alpha = 0.5;
 
-        const getCircuitXYTargetFromEntity = (entity: any, circuitId: number) => {
+        const getCircuitXYTargetFromEntity = (entity: BlueprintEntity, circuitId: number) => {
             var sizeW = 1;
             var sizeH = 1;
             var entityDrawingSpec = this.getEntityDrawingSpecForEntity(entity);
@@ -393,7 +395,7 @@ export default class BlueprintRenderer {
             return {x: x + xOffset, y: y + yOffset};
         }
 
-        const drawCircuitLine = (fromEntityNumber: number, startPosition: Coords, connection: any) => {
+        const drawCircuitLine = (fromEntityNumber: number, startPosition: Coords, connection: EntityConnection) => {
             var targetEntityId = connection.entity_id;
             if (targetEntityId < fromEntityNumber || (targetEntityId == fromEntityNumber && connection.circuit_id == 1)) {
                 return;
@@ -410,19 +412,19 @@ export default class BlueprintRenderer {
 
         }
 
-        forEach(entities, (entity: any) => {
+        forEach(entities, (entity) => {
             if (!entity.connections) {
                 return;
             }
             var entity_number = entity.entity_number;
-            forEach(entity.connections, (connections: any, circuitId: number) => {
-                var startPosition = getCircuitXYTargetFromEntity(entity, circuitId);
+            forEach(entity.connections, (connections: EntityConnections, circuitId) => {
+                var startPosition = getCircuitXYTargetFromEntity(entity, parseInt(circuitId));
                 circuitryLayer.lineStyle(2, 0xff0000);
-                forEach(connections.red, (connection: any) => {
+                forEach(connections.red, (connection) => {
                     drawCircuitLine(entity_number, startPosition, connection);
                 });
                 circuitryLayer.lineStyle(2, 0x00ff00);
-                forEach(connections.green, (connection: any) => {
+                forEach(connections.green, (connection) => {
                     drawCircuitLine(entity_number, startPosition, connection);
                 });
             });
@@ -443,7 +445,7 @@ export default class BlueprintRenderer {
              });*/
 
 
-            forEach(entities, (entity: any) => {
+            forEach(entities, (entity) => {
                 var sizeW = 1;
                 var sizeH = 1;
                 var entityDrawingSpec = this.getEntityDrawingSpecForEntity(entity);

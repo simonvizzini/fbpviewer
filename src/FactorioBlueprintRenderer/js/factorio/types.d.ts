@@ -35,11 +35,84 @@ type EntityImageDirection = {
 }
 
 type EntityCircuitEndpoints = {
-    [num: number]: Coords;
+    [num: string]: Coords;
 }
 
 type EntityImageMap = {
     [name: string]: EntityImage;
+}
+
+type BlueprintIcon = {
+    signal: {
+        type: string;
+        name: string;
+    }
+    index: number;
+}
+
+type EntityFilter = {index: number, name: string}
+type EntityRequestFilter = EntityFilter & {count: number}
+
+type EntityControlBehavior = {
+    circuit_condition: {
+        first_signal: {
+            type: string;
+            name: string;
+        }
+        constant: number;
+        comparator: string;
+    };
+    use_colors?: boolean;
+}
+
+type EntityConnection = {
+    entity_id: number;
+    circuit_id?: number;
+}
+
+type EntityConnections = {
+    red?: EntityConnection[]
+    green?: EntityConnection[]
+}
+
+type BlueprintEntity = {
+    name: string;
+    entity_number: number;
+    position: Coords;
+    type?: string;
+    direction?: number;
+    recipe?: string;
+    items?: {item: string, count: number}[];
+    filters?: EntityFilter[];
+    request_filters?: EntityRequestFilter[];
+    connections: { [index: string]: EntityConnections };
+    control_behavior?: EntityControlBehavior;
+}
+
+type BlueprintTile = {
+    name: string;
+    position: Coords;
+}
+
+type Blueprint = {
+    item: string;
+    label: string;
+    version: number;
+    icons: BlueprintIcon[];
+    entities: BlueprintEntity[];
+    tiles?: BlueprintTile[]
+}
+
+type BlueprintBookEntry = {
+    blueprint: Blueprint;
+    index?: number;
+}
+
+type BlueprintData = {
+    blueprint_book?: {
+        blueprints: BlueprintBookEntry[];
+    }
+    blueprint?: Blueprint;
 }
 
 type Coords = {
