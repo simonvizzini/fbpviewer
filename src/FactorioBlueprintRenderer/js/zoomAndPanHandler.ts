@@ -2,7 +2,20 @@ import { IKeyboardHandler } from "./keyboardHandler";
 
 type MouseListenerCallback = (x: number, y: number) => void;
 
-export default class ZoomAndPanHandler {
+export interface IZoomAndPanHandler {
+    // zoom(zoomMultiplier: number, x: number, y: number): void;
+    // clampZoom(): void;
+    // clampPosition(): void;
+    // getWorldPosition(mouseX: number, mouseY: number): Coords2D;
+    // handleKeyboardPanning(): void;
+    // onMouseWheel(event: JQueryMousewheel.JQueryMousewheelEventObject): void;
+    init(canvas: HTMLCanvasElement): void;
+    setContainer(container: PIXI.Container, keepPosition: boolean): void;
+    setOnMousePositionChanged(listener: MouseListenerCallback): void;
+    setOnMouseClickListener(listener: MouseListenerCallback): void;
+}
+
+export default class ZoomAndPanHandler implements IZoomAndPanHandler {
     private MAX_SCALE =                             3;
     private minScale =                              1;
     private lastPosition: { x: number, y: number } | null;
@@ -21,7 +34,7 @@ export default class ZoomAndPanHandler {
         this.keyboardHandler = keyboardHandler;
     }
 
-    zoom(zoomMultiplier: number, x: number, y: number) {
+    private zoom(zoomMultiplier: number, x: number, y: number) {
         var worldPosition = this.getWorldPosition(x, y);
         this.pixiContainer.scale.x *= zoomMultiplier;
         this.pixiContainer.scale.y *= zoomMultiplier;
@@ -35,7 +48,7 @@ export default class ZoomAndPanHandler {
         this.clampPosition();
     }
 
-    clampZoom() {
+    private clampZoom() {
         if (this.pixiContainer.scale.x > this.MAX_SCALE) {
             this.pixiContainer.scale.x = this.MAX_SCALE;
         }
@@ -50,7 +63,7 @@ export default class ZoomAndPanHandler {
         }
     }
 
-    clampPosition() {
+    private clampPosition() {
         if (this.pixiContainer.x > 0) {
             this.pixiContainer.x = 0;
         }
@@ -67,7 +80,7 @@ export default class ZoomAndPanHandler {
         }
     }
 
-    getWorldPosition(mouseX: number, mouseY: number) {
+    private getWorldPosition(mouseX: number, mouseY: number) {
         return {
             x: (mouseX - this.pixiContainer.x) / this.pixiContainer.scale.x,
             y: (mouseY - this.pixiContainer.y) / this.pixiContainer.scale.y
@@ -116,7 +129,7 @@ export default class ZoomAndPanHandler {
         //this.clampPosition();
     }
 
-    onMouseWheel(event: JQueryMousewheel.JQueryMousewheelEventObject) {
+    private onMouseWheel(event: JQueryMousewheel.JQueryMousewheelEventObject) {
         if (!this.pixiContainer) {
             return;
         }
@@ -124,7 +137,7 @@ export default class ZoomAndPanHandler {
         this.zoom(zoomMultiplier, event.offsetX || 0, event.offsetY || 0); // TODO: offsetX and offsetY can be apparently undefined
     }
 
-    onMouseDown(event: JQuery.Event<HTMLCanvasElement>) {
+    private onMouseDown(event: JQuery.Event<HTMLCanvasElement>) {
         let offsetX = event.offsetX;
         let offsetY = event.offsetY;
 
@@ -138,7 +151,7 @@ export default class ZoomAndPanHandler {
         this.movedBy = 0;
     }
 
-    onMouseUp(event: JQuery.Event<HTMLCanvasElement>) {
+    private onMouseUp(event: JQuery.Event<HTMLCanvasElement>) {
         let offsetX = event.offsetX;
         let offsetY = event.offsetY;
 
@@ -158,12 +171,12 @@ export default class ZoomAndPanHandler {
         this.lastPosition = null;
     }
 
-    onMouseOut(/*event: JQuery.Event<HTMLCanvasElement>*/) {
+    private onMouseOut(/*event: JQuery.Event<HTMLCanvasElement>*/) {
         this.lastPosition = null;
         this.moved = true;
     }
 
-    onMouseMove(event: JQuery.Event<HTMLCanvasElement>) {
+    private onMouseMove(event: JQuery.Event<HTMLCanvasElement>) {
         let offsetX = event.offsetX;
         let offsetY = event.offsetY;
 
@@ -190,7 +203,7 @@ export default class ZoomAndPanHandler {
         this.onMousePositionChanged(Math.round(worldPosition.x), Math.round(worldPosition.y));
     }
 
-    onHammerPinch(event: HammerInput) {
+    private onHammerPinch(event: HammerInput) {
         this.zoom(Math.pow(event.scale, 0.05), event.center.x, event.center.y);
     }
 

@@ -6,7 +6,19 @@ import { ImagesUI } from "./factorio/ui";
 import { parse, stringify, TEST_CASES } from "./factorio/blueprints";
 import createEntitiesFunctions from "./factorio/entities/index";
 
-export class FactorioBlueprintReader {
+export interface IFactorioBlueprintReader {
+    iconSize:   number;
+    icons:      EntityImageMap;
+    tiles:      EntityImageMap;
+    ImagesUI:   { INFO_DARK_BACKGROUND: string, BACKGROUND: string }
+    entities:   { [name: string]: EntityImage };
+    TEST_CASES: any;
+    createEntitiesFunctions: (() => EntityImageMap)[];
+    parse(blueprintString: string): { data: any, version: string }
+    stringify(blueprintData: any): string;
+}
+
+export class FactorioBlueprintReader implements IFactorioBlueprintReader {
     iconSize = iconSize;
     icons = icons;
     tiles = tiles;

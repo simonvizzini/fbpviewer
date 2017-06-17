@@ -1,9 +1,15 @@
 type ListenerCallback = (currentSecond: number) => void;
 
-export default class AnimationHandler {
-    onSecondTickListeners: ListenerCallback[] =         [];
-    currentFrame =                                      0;
-    currentSecond =                                     0;
+export interface IAnimationHandler {
+    clear(): void;
+    tick(): void;
+    addOnSecondTickListener(listener: ListenerCallback): void;
+}
+
+export default class AnimationHandler implements IAnimationHandler {
+    private currentFrame =      0;
+    private currentSecond =     0;
+    private onSecondTickListeners: ListenerCallback[] = [];
 
     clear() {
         this.onSecondTickListeners = [];

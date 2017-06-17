@@ -1,7 +1,7 @@
 const forEach = require("lodash.foreach");
 
 export const iconSize = 32;
-export const icons = (() => {
+export const icons = ((): EntityImageMap => {
     const OVERLAY_LAYER = 200;
 
     var items = [
@@ -229,13 +229,7 @@ export const icons = (() => {
         'black', 'blue', 'cyan', 'green', 'grey', 'pink', 'red', 'white', 'yellow'
     ];
 
-
-
-    type Icon = {
-        image: Image
-    }
-
-    var allIcons: { [name: string]: Icon } = {};
+    var allIcons: EntityImageMap = {}
 
     forEach(items, (itemName: string) => {
         allIcons[itemName] = {

@@ -1,4 +1,4 @@
-export const tiles = {
+export const tiles: EntityImageMap = {
     'concrete':              {
         image: {
             type: 'random_trim',

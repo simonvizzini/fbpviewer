@@ -1,6 +1,6 @@
 const PIXI = require("pixi.js");
 
-createColorFillShader = function() {
+function createColorFillShader() {
     var DefaultVert = (function() {
         var str = "";
 
