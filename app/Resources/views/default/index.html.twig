@@ -54,6 +54,6 @@
         <script src="{{ asset_url }}"></script>
     {% endjavascripts %}
     <script type="text/javascript">
-        const FBR_INITIAL_BLUEPRINT = {{ blueprint_string|json_encode|raw }};
+        window.FBR_INITIAL_BLUEPRINT = {{ blueprint_string|json_encode|raw }};
     </script>
 {% endblock %}

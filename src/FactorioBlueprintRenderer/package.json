@@ -2,7 +2,7 @@
   "name": "factorio-blueprint-renderer",
   "version": "0.0.0",
   "description": "",
-  "main": "js/init.js",
+  "main": "js/init.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack",
@@ -32,6 +32,7 @@
     "@types/highlight.js": "^9.1.9",
     "@types/jquery": "^3.2.1",
     "@types/jquery-mousewheel": "^3.1.6",
+    "@types/jquerymobile": "^1.4.29",
     "@types/lodash.foreach": "^4.5.2",
     "@types/lodash.includes": "^4.3.2",
     "@types/lodash.merge": "^4.6.2",
