@@ -5,8 +5,6 @@ import * as PIXI from "pixi.js";
 
 import { IFactorioBlueprintReader } from "../factorioBlueprintReader";
 
-const FBR_IMAGES_PREFIX = (window as any)["FBR_IMAGES_PREFIX"];
-
 export default class Loader {
     constructor(private factorioBlueprintReader: IFactorioBlueprintReader) {
     }
@@ -28,7 +26,7 @@ export default class Loader {
     }
 
     _prepareTrimmedTexturesFromImageData(imageData: Image) {
-        var imagePath = FBR_IMAGES_PREFIX + imageData.path;
+        var imagePath = window.FBR_IMAGES_PREFIX + imageData.path;
         if (imageData.type == 'trim' && imageData.rows && imageData.cols && imageData.number) { // todo: there is a TS feature that can handle this... have to find out which
             this._prepareTrimmedTexture(imagePath, imageData.rows, imageData.cols, imageData.number);
         } else if (imageData.type == 'animated' || imageData.type == 'random_trim') { // todo
@@ -78,13 +76,13 @@ export default class Loader {
 
         function addEntityImageToLoader(entityData: EntityImage) {
             if (entityData.image && entityData.image.path) { // todo
-                var fullPath = FBR_IMAGES_PREFIX + entityData.image.path;
+                var fullPath = window.FBR_IMAGES_PREFIX + entityData.image.path;
                 if (!includes(imagesToLoad, fullPath)) {
                     imagesToLoad.push(fullPath);
                 }
             } else if (entityData.image && entityData.image.type == 'container') { // todo
                 forEach(entityData.image.images, (imageData) => {
-                    var imageFullPath = FBR_IMAGES_PREFIX + imageData.path;
+                    var imageFullPath = window.FBR_IMAGES_PREFIX + imageData.path;
                     if (!includes(imagesToLoad, imageFullPath)) {
                         imagesToLoad.push(imageFullPath);
                     }
@@ -131,7 +129,7 @@ export default class Loader {
         });
 
         forEach(this.factorioBlueprintReader.ImagesUI, (imageUiPath) => {
-           imagesToLoad.push(FBR_IMAGES_PREFIX + imageUiPath);
+           imagesToLoad.push(window.FBR_IMAGES_PREFIX + imageUiPath);
         });
 
         return imagesToLoad;
