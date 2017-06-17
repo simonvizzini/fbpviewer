@@ -1,9 +1,8 @@
 const forEach = require("lodash.foreach");
+import * as pako from"pako";
 
-import { iconSize, icons } from "./factorio/icons";
+import { icons } from "./factorio/icons";
 import { tiles } from "./factorio/tiles";
-import { ImagesUI } from "./factorio/ui";
-import { parse, stringify, TEST_CASES } from "./factorio/blueprints";
 import createEntitiesFunctions from "./factorio/entities/index";
 
 export interface IFactorioBlueprintReader {
@@ -12,22 +11,21 @@ export interface IFactorioBlueprintReader {
     tiles:      EntityImageMap;
     ImagesUI:   { INFO_DARK_BACKGROUND: string, BACKGROUND: string }
     entities:   { [name: string]: EntityImage };
-    TEST_CASES: any;
     createEntitiesFunctions: (() => EntityImageMap)[];
     parse(blueprintString: string): { data: any, version: string }
     stringify(blueprintData: any): string;
 }
 
 export default class FactorioBlueprintReader implements IFactorioBlueprintReader {
-    iconSize = iconSize;
+    iconSize = 32
     icons = icons;
     tiles = tiles;
-    ImagesUI = ImagesUI;
-    parse = parse;
-    stringify = stringify;
-    TEST_CASES = TEST_CASES;
     createEntitiesFunctions = createEntitiesFunctions;
     entities: { [name: string]: EntityImage };
+    ImagesUI = {
+        INFO_DARK_BACKGROUND: "core/entity-info-dark-background.png",
+        BACKGROUND:           "background.png"
+    };
 
     loadEntities() {
         this.entities = {};
@@ -37,5 +35,21 @@ export default class FactorioBlueprintReader implements IFactorioBlueprintReader
                 this.entities[entityKey] = entitySpec;
             });
         });
+    }
+
+    parse(blueprintString: string) {
+        var version = blueprintString[0];
+        blueprintString = blueprintString.substr(1);
+        blueprintString = atob(blueprintString); // base64 decode
+        blueprintString = pako.inflate(blueprintString, {to: 'string'});
+        var blueprintData = JSON.parse(blueprintString);
+        return {data: blueprintData, version: version};
+    }
+
+    stringify(blueprintData: any) {
+        var blueprintString = JSON.stringify(blueprintData.data);
+        blueprintString = pako.deflate(blueprintString, {to: 'string'});
+        blueprintString = btoa(blueprintString); // base64 encode
+        return blueprintData.version + blueprintString;
     }
 }

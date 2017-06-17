@@ -1,6 +1,5 @@
 const forEach = require("lodash.foreach");
 
-export const iconSize = 32;
 export const icons = ((): EntityImageMap => {
     const OVERLAY_LAYER = 200;
 

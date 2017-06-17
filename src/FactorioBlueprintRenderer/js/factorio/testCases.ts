@@ -1,21 +1,3 @@
-import * as pako from"pako";
-
-export const parse = (blueprintString: string) => {
-    var version = blueprintString[0];
-    blueprintString = blueprintString.substr(1);
-    blueprintString = atob(blueprintString); // base64 decode
-    blueprintString = pako.inflate(blueprintString, {to: 'string'});
-    var blueprintData = JSON.parse(blueprintString);
-    return {data: blueprintData, version: version};
-};
-
-export const stringify = (blueprintData: any) => {
-    var blueprintString = JSON.stringify(blueprintData.data);
-    blueprintString = pako.deflate(blueprintString, {to: 'string'});
-    blueprintString = btoa(blueprintString); // base64 encode
-    return blueprintData.version + blueprintString;
-};
-
 export const TEST_CASES = {
     radar:                 '0eNqVkt0KwyAMhd8l1xZs6Q/4KmMMu4ZNaGNRO1aK7z51Y4zCxrwJJJx8Ho7ZoB8XnI0iB2IDddZkQRw2sOpCcowzt84IApTDCRiQnGJn5CANeAaKBryDKP2RAZJTTuETkJr1RMvUowmC3SqDWdug1hTfCATOYA3VR5BT44uyExVlUhWlf+Os04TFLN012Pm2wDP1f/N5ph+eZ4fnuclNJzOcn9mEb0snIj4uisENjU2Atq6rpmvqtuq8fwCvb8se',
     bpr:                   '0eNqdmN1qg0AQRt9lri3sOro/vkrJRZouZcGoRFsaxHevNgR60RZPrkKSL8O3M2cms87y0r6n4ZK7SZpZ8qnvRmmeZxnzW3dst8+m65CkkTylsxTSHc/bu1V3uqQpyVJI7l7TpzR2ORQy5TbdAgz9mKfcd1uI9dsnWxZyXV/98luQv/UO6muor6Beob6Eesv0hslhdGge5gamHlYWgrObSws5tiy8geENw8AgN5GZiQzhiKxHBHBE5wxs1gTW2gE5D4hez6aeZ0PPs5nn0dDwqKsdmjAODRhlmCujRVmJlJVIWYmUoausoxV1tKK+UASXIlz0AVxYPRkse0mEOxVcGeA/EQnO/uUMotCi9rSoIdiSyVZMtmA6lEGHcuLQKR06pXvklCVSW6I2RIwiI9MoHyjVqIoIkJ3seUSqJ1XxpCoB+QjER+A+dtLBNnC2gEdC3v1i4pi8RPKdYN/vYDWTw+iK5Hu9oMvpf3fTQ3F7JtP8eIRTyEe6jN+/d1VV1r6uXOmX5QsHn63x',
