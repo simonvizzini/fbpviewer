@@ -66,26 +66,26 @@ type EntityControlBehavior = {
 }
 
 type EntityConnection = {
-    entity_id: number;
+    entity_id:   number;
     circuit_id?: number;
 }
 
 type EntityConnections = {
-    red?: EntityConnection[]
+    red?:   EntityConnection[]
     green?: EntityConnection[]
 }
 
 type BlueprintEntity = {
-    name: string;
-    entity_number: number;
-    position: Coords;
-    type?: string;
-    direction?: number;
-    recipe?: string;
-    items?: {item: string, count: number}[];
-    filters?: EntityFilter[];
+    name:             string;
+    entity_number:    number;
+    position:         Coords;
+    type?:            string;
+    direction?:       number;
+    recipe?:          string;
+    items?:           {item: string, count: number}[];
+    filters?:         EntityFilter[];
     request_filters?: EntityRequestFilter[];
-    connections: { [index: string]: EntityConnections };
+    connections:      {[index: string]: EntityConnections};
     control_behavior?: EntityControlBehavior;
 }
 
@@ -95,17 +95,17 @@ type BlueprintTile = {
 }
 
 type Blueprint = {
-    item: string;
-    label: string;
-    version: number;
-    icons: BlueprintIcon[];
+    item:     string;
+    label:    string;
+    version:  number;
+    icons:    BlueprintIcon[];
     entities: BlueprintEntity[];
-    tiles?: BlueprintTile[]
+    tiles?:   BlueprintTile[]
 }
 
 type BlueprintBookEntry = {
     blueprint: Blueprint;
-    index?: number;
+    index?:    number;
 }
 
 type BlueprintData = {

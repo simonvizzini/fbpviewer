@@ -258,7 +258,6 @@ export default class BlueprintRenderer {
     }
 
     renderBlueprint(/*pixiRenderer: any, stage: any,*/ blueprintData: BlueprintBookEntry) {
-        // todo: figure out the shape of entities
         var entities = blueprintData.blueprint.entities || [];
         var tiles = blueprintData.blueprint.tiles || [];
 
