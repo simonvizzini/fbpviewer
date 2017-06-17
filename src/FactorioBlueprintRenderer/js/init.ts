@@ -1,7 +1,5 @@
 require("bootstrap");
 require("jquery-mousewheel");
-import * as Hammer from "hammerjs";
-window.Hammer = Hammer;
 
 import forEach = require("lodash.foreach");
 const BootstrapDialog = require("bootstrap3-dialog");

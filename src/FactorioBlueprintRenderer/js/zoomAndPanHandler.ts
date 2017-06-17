@@ -1,3 +1,4 @@
+import Hammer = require("hammerjs");
 import { IKeyboardHandler } from "./keyboardHandler";
 
 type MouseListenerCallback = (x: number, y: number) => void;
