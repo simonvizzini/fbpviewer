@@ -4,27 +4,22 @@ import { IKeyboardHandler } from "./keyboardHandler";
 type MouseListenerCallback = (x: number, y: number) => void;
 
 export interface IZoomAndPanHandler {
-    // zoom(zoomMultiplier: number, x: number, y: number): void;
-    // clampZoom(): void;
-    // clampPosition(): void;
-    // getWorldPosition(mouseX: number, mouseY: number): Coords2D;
-    // handleKeyboardPanning(): void;
-    // onMouseWheel(event: JQueryMousewheel.JQueryMousewheelEventObject): void;
     init(canvas: HTMLCanvasElement): void;
+    handleKeyboardPanning(): void;
     setContainer(container: PIXI.Container, keepPosition: boolean): void;
     setOnMousePositionChanged(listener: MouseListenerCallback): void;
     setOnMouseClickListener(listener: MouseListenerCallback): void;
 }
 
 export default class ZoomAndPanHandler implements IZoomAndPanHandler {
-    private MAX_SCALE =                             3;
-    private minScale =                              1;
-    private lastPosition: { x: number, y: number } | null;
-    private canvasWidth =                           0;
-    private canvasHeight =                          0;
-    private pixiContainerWidth =                    0;
-    private pixiContainerHeight =                   0;
-    private movedBy =                               0;
+    private MAX_SCALE =             3;
+    private minScale =              1;
+    private lastPosition:           { x: number, y: number } | null;
+    private canvasWidth =           0;
+    private canvasHeight =          0;
+    private pixiContainerWidth =    0;
+    private pixiContainerHeight =   0;
+    private movedBy =               0;
     private moved: boolean;
     private pixiContainer: PIXI.Container;
     private keyboardHandler: IKeyboardHandler;
