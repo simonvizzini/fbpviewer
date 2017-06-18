@@ -17,7 +17,7 @@ import KeyboardHandler from "./keyboardHandler";
 import ZoomAndPanHandler from "./zoomAndPanHandler";
 import Loader from "./images/loader";
 
-const FBR_DEV = 1;
+const FBR_DEV = 0;
 window.FBR_IMAGES_PREFIX = FBR_DEV ? "/web/images/factorio/" : "images/factorio/";
 window.FBR_PIXELS_PER_TILE = 32;
 window.FBR_CANVAS_WIDTH = 0;
@@ -26,20 +26,28 @@ const FBR_INITIAL_BLUEPRINT = window.FBR_INITIAL_BLUEPRINT // is currently the b
 let currentBlueprintIndex = 0;
 let currentBlueprintString = "";
 
-$(function () {
+function initUi() {
     createDropShadowFilter();
 
     const STATUS_WIDTH = 100;
     const STATUS_HEIGHT = 20;
 
-    window.FBR_CANVAS_WIDTH = $("#main-site-container").width() - 5;
-    window.FBR_CANVAS_HEIGHT = $(window).height() - $(".nav").height() - 5;
+    const navbar = document.getElementsByClassName("navbar")[0] as HTMLElement;
+    const CANVAS_WIDTH = window.innerWidth;
+    const CANVAS_HEIGHT = window.innerHeight - navbar.offsetHeight;
+    const container = document.getElementById("fbpviewer") as HTMLElement;
+    const view: HTMLCanvasElement = document.getElementById("fbp-canvas") as HTMLCanvasElement;
 
-    var renderer = PIXI.autoDetectRenderer(window.FBR_CANVAS_WIDTH, window.FBR_CANVAS_HEIGHT, { antialias: true, forceFXAA: true } as PIXI.WebGLRendererOptions); // todo: check why the cast is necessary, type definition seems to be incorrect
+    //var renderer = PIXI.autoDetectRenderer(window.FBR_CANVAS_WIDTH, window.FBR_CANVAS_HEIGHT, { antialias: true, forceFXAA: true } as PIXI.WebGLRendererOptions); // todo: check why the cast is necessary, type definition seems to be incorrect
+    var renderer = PIXI.autoDetectRenderer(CANVAS_WIDTH, CANVAS_HEIGHT, { view, antialias: true, forceFXAA: true } as PIXI.WebGLRendererOptions); // todo: check why the cast is necessary, type definition seems to be incorrect
+    // const { view } = renderer;
+    container.appendChild(view);
     // todo: type definition says there is no backgroundColor?
     // renderer.backgroundColor = 0x000000;
-
-    $("#main-site-container").get(0).appendChild(renderer.view);
+    (global as any)._renderer = renderer;
+    window.FBR_CANVAS_WIDTH = view.width; //$("#main-site-container").width() - 5;
+    window.FBR_CANVAS_HEIGHT = view.height; //$(window).height() - $(".nav").height() - 5;
+    // $("#main-site-container").get(0).appendChild(renderer.view);
 
     const factorioBlueprintReader = new FactorioBlueprintReader();
     factorioBlueprintReader.loadEntities();
@@ -48,14 +56,14 @@ $(function () {
     const loader = new Loader(factorioBlueprintReader);
 
     const iconCropper = new IconCropper();
-    iconCropper.init($("#main-site-container").get(0));
+    iconCropper.init(container);
 
     const blueprintRenderer = new BlueprintRenderer(factorioBlueprintReader, keyboardHandler);
     blueprintRenderer.on("entityclicked", showEntityDialog);
 
     var bottomStatus = new PIXI.Container();
-    bottomStatus.x = window.FBR_CANVAS_WIDTH - 100;
-    bottomStatus.y = window.FBR_CANVAS_HEIGHT - 20;
+    bottomStatus.x = view.width - 100;
+    bottomStatus.y = view.height - 20;
 
     var positionBackground = new PIXI.Graphics();
     positionBackground.beginFill(0xCCCCCC);
@@ -68,6 +76,7 @@ $(function () {
         fontFamily: 'Arial',
         fontSize: 10
     }));
+
     statusText.anchor.set(1, 0);
     statusText.x = STATUS_WIDTH - 10;
     statusText.y = 2;
@@ -90,20 +99,21 @@ $(function () {
 
             // var url = resource.url;
             // var name = resource.name;
-            console.log("progress: ", loader.progress)
+            // Somehow now progress is visible
+            // console.log("progress: ", loader.progress)
             graphics.clear();
             graphics.beginFill(0xFFFFFF);
             graphics.lineStyle(5, 0x000000);
-            graphics.drawRect(20, window.FBR_CANVAS_HEIGHT / 2 - 20, window.FBR_CANVAS_WIDTH - 40, 40);
+            graphics.drawRect(20, view.height / 2 - 20, view.width - 40, 40);
 
             graphics.beginFill(0x0000FF);
-            graphics.drawRect(20, window.FBR_CANVAS_HEIGHT / 2 - 20, (window.FBR_CANVAS_WIDTH - 40) / 100 * loader.progress, 40);
+            graphics.drawRect(20, view.height / 2 - 20, (view.width - 40) / 100 * loader.progress, 40);
         })
         .load(() => {
             stage.removeChild(graphics);
             stage.addChild(gameContainer);
             stage.addChild(bottomStatus);
-            graphics.destroy(); // check if this works
+            graphics.destroy();
 
             if (FBR_DEV) {
                 loader.prepareTrimmedTextures();
@@ -143,7 +153,10 @@ $(function () {
                         blueprintData,
                         blueprintRenderer,
                         iconCropper,
-                        redraw
+                        (index: number) => {
+                            currentBlueprintIndex = index;
+                            redraw();
+                        }
                     );
                 }
 
@@ -161,6 +174,10 @@ $(function () {
                 redraw
             );
         });
+}
+
+$(function () {
+    initUi();
 });
 
 function showEntityDialog(_: PIXI.interaction.InteractionEvent, entity: BlueprintEntity) {
@@ -249,7 +266,7 @@ function initBlueprintDropdown(
     blueprintData: { data: BlueprintData },
     blueprintRenderer: BlueprintRenderer,
     iconCropper: IconCropper,
-    redraw: () => void
+    onClick: (key: number) => void
 ) {
     $('#blueprint-recipe-selector ul').find('li').remove();
     if (blueprintData.data.blueprint_book) {
@@ -280,10 +297,8 @@ function initBlueprintDropdown(
                 }
             }
             var option = $('<li><a href="#">' + icons + ' ' + value.blueprint.label + '</a></li>');
-            option.click(() => {
-                currentBlueprintIndex = key; // todo: is key really a number?
-                redraw();
-            });
+            option.click(() => onClick(key));
+
             if (key === currentBlueprintIndex) {
                 option.addClass('active');
             }

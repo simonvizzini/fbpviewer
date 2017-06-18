@@ -7,7 +7,7 @@
     <title>FBPViewer</title>
 </head>
 <body>
-    <nav class="navbar navbar-inverse navbar-fixed-top">
+    <nav class="navbar navbar-inverse" style="margin-bottom: 0">
         <div class="container-fluid">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false"
@@ -35,7 +35,10 @@
         </div>
     </nav>
 
-    <div class="container-fluid" id="main-site-container" style="padding:0;margin:0;" />
+    <div id="fbpviewer">
+        <canvas id="fbp-canvas"/>
+    </div>
+
     <script src="./default_blueprintbook.js"></script>
     <script src="../dist/fbpviewer.bundle.js"></script>
 </body>
