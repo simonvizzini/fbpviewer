@@ -6,7 +6,6 @@ require("jquery-mousewheel");
 
 import forEach = require("lodash.foreach");
 const BootstrapDialog = require("bootstrap3-dialog");
-import hljs = require("highlight.js");
 import * as PIXI from "pixi.js";
 const createDropShadowFilter = require("./pixi/createDropShadowFilter");
 
@@ -171,7 +170,7 @@ function initUi() {
 
                     initBlueprintDropdown(
                         factorioBlueprintReader,
-                        blueprintData,
+                        blueprintData.data.blueprint_book,
                         blueprintRenderer,
                         iconCropper,
                         (index: number) => {
@@ -211,12 +210,7 @@ function showEntityDialog(_: PIXI.interaction.InteractionEvent, entity: Blueprin
             action: (dialogRef: any) => {
                 dialogRef.close();
             }
-        }],
-        onshown: (/*dialogRef: any*/) => {
-            $('pre.json').each((_, block) => {
-                hljs.highlightBlock(block);
-            });
-        }
+        }]
     });
 }
 
@@ -284,48 +278,63 @@ function initButtons(
 
 function initBlueprintDropdown(
     factorioBlueprintReader: FactorioBlueprintReader,
-    blueprintData: { data: BlueprintData },
+    blueprintBook: BlueprintBook,
     blueprintRenderer: BlueprintRenderer,
     iconCropper: IconCropper,
     onClick: (key: number) => void
 ) {
     $('#blueprint-recipe-selector ul').find('li').remove();
-    if (blueprintData.data.blueprint_book) {
-        forEach(blueprintData.data.blueprint_book.blueprints, (value, key: number) => { // todo: is key really a number?
-            var icons = '';
-            for (var k = 0; k < 4; k++) {
-                var icon = value.blueprint.icons[k];
-                if (icon) {
-                    var signalName = icon.signal.name;
-                    if (factorioBlueprintReader.icons[signalName]) {
-                        var imageSpec = factorioBlueprintReader.icons[signalName].image;
-                        var iconSprites = blueprintRenderer.createEntityLayers(imageSpec as Image);
-                        var iconSrc = iconCropper.createIconURL(iconSprites);
-                        icons += '<img src="' + iconSrc + '" />';
+    const options = createBlueprintbookOptions(
+        factorioBlueprintReader,
+        blueprintBook,
+        blueprintRenderer,
+        iconCropper,
+        onClick
+    );
+    forEach(options, (option) => $('#blueprint-recipe-selector ul').append(option));
+}
+
+function createBlueprintbookOptions(
+    factorioBlueprintReader: FactorioBlueprintReader,
+    blueprintBook: BlueprintBook,
+    blueprintRenderer: BlueprintRenderer,
+    iconCropper: IconCropper,
+    onClick: (key: number) => void
+) {
+    return blueprintBook.blueprints.map((value, key: number) => {
+        var icons = '';
+        for (var k = 0; k < 4; k++) {
+            var icon = value.blueprint.icons[k];
+            if (icon) {
+                var signalName = icon.signal.name;
+                if (factorioBlueprintReader.icons[signalName]) {
+                    var imageSpec = factorioBlueprintReader.icons[signalName].image;
+                    var iconSprites = blueprintRenderer.createEntityLayers(imageSpec as Image);
+                    var iconSrc = iconCropper.createIconURL(iconSprites);
+                    icons += '<img src="' + iconSrc + '" />';
+                    continue;
+
+                    /*if (imageSpec.type == 'sprite') {
+                        icons += '<img src="' + FBR_IMAGES_PREFIX + imageSpec.path + '" />';
                         continue;
-
-                        /*if (imageSpec.type == 'sprite') {
-                         icons += '<img src="' + FBR_IMAGES_PREFIX + imageSpec.path + '" />';
-                         continue;
-                         } else {
-                         console.log('Icon complex', signalName);
-                         }*/
-                    } else {
-                        console.log('Icon not found', signalName);
-                    }
+                        } else {
+                        console.log('Icon complex', signalName);
+                        }*/
                 } else {
-                    icons += '<span style="margin-right: 32px;"></span>';
+                    console.log('Icon not found', signalName);
                 }
+            } else {
+                icons += '<span style="margin-right: 32px;"></span>';
             }
-            var option = $('<li><a href="#">' + icons + ' ' + value.blueprint.label + '</a></li>');
-            option.click(() => onClick(key));
+        }
+        var option = $('<li><a href="#">' + icons + ' ' + value.blueprint.label + '</a></li>');
+        option.click(() => onClick(key));
 
-            if (key === currentBlueprintIndex) {
-                option.addClass('active');
-            }
-            $('#blueprint-recipe-selector ul').append(option);
-        });
-    }
+        if (key === currentBlueprintIndex) {
+            option.addClass('active');
+        }
+        return option;
+    });
 }
 
 $(document).on("mobileinit", function () {

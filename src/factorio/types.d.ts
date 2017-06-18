@@ -108,10 +108,12 @@ type BlueprintBookEntry = {
     index?:    number;
 }
 
+type BlueprintBook = {
+    blueprints: BlueprintBookEntry[];
+}
+
 type BlueprintData = {
-    blueprint_book?: {
-        blueprints: BlueprintBookEntry[];
-    }
+    blueprint_book?: BlueprintBook;
     blueprint?: Blueprint;
 }
 
