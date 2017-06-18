@@ -5,6 +5,7 @@
   "main": "js/init.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack-dev-server --output-public-path=/dist/",
     "build": "webpack",
     "build:prod": "webpack -p",
     "watch": "webpack --watch"
@@ -39,8 +40,14 @@
     "@types/pako": "^1.0.0",
     "@types/pixi.js": "^4.5.0",
     "@types/seedrandom": "^2.4.27",
+    "css-loader": "^0.28.4",
+    "file-loader": "^0.11.2",
+    "style-loader": "^0.18.2",
+    "svg-url-loader": "^2.0.2",
     "ts-loader": "^2.1.0",
     "typescript": "^2.3.4",
-    "webpack": "^2.6.1"
+    "url-loader": "^0.5.9",
+    "webpack": "^2.6.1",
+    "webpack-dev-server": "^2.4.5"
   }
 }

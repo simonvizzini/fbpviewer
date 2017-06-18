@@ -1,3 +1,6 @@
+import "bootstrap/dist/css/bootstrap.css";
+import "bootstrap/dist/css/bootstrap-theme.css";
+
 require("bootstrap");
 require("jquery-mousewheel");
 
@@ -20,6 +23,8 @@ window.FBR_PIXELS_PER_TILE = 32;
 window.FBR_CANVAS_WIDTH = 0;
 window.FBR_CANVAS_HEIGHT = 0;
 // window.FBR_REDRAW_FUNC
+
+const FBR_INITIAL_BLUEPRINT = require("../entities.json");
 
 $(function () {
     createDropShadowFilter();
@@ -81,7 +86,7 @@ $(function () {
     var gameContainer = new PIXI.Container();
 
     PIXI.loader
-        .add(FBR_DEV ? loader.getImagesToLoad() : '/images/spritesheet.json')
+        .add(FBR_DEV ? loader.getImagesToLoad() : './images/spritesheet.json')
         .on("progress", function (loader /*, resource*/) {
 
             // var url = resource.url;
@@ -116,9 +121,9 @@ $(function () {
 
             gameLoop();
 
-            var currentBlueprintString = window.FBR_INITIAL_BLUEPRINT;
+            var currentBlueprintString = ""; // FBR_INITIAL_BLUEPRINT;
             var currentBlueprintIndex = 0;
-            var blueprintData = factorioBlueprintReader.parse(currentBlueprintString);
+            var blueprintData = { data: FBR_INITIAL_BLUEPRINT }; //factorioBlueprintReader.parse(currentBlueprintString);
             var blueprintContainer = new PIXI.Container();
             zoomAndPanHandler.setContainer(blueprintContainer);
             gameContainer.addChild(blueprintContainer);
