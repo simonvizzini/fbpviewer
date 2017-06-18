@@ -7,7 +7,7 @@ var config = {
         fbpviewer: './init.ts',
     },
     output: {
-        path: __dirname + '/../AppBundle/Resources/public/js',
+        path: __dirname + '/dist',
         filename: '[name].bundle.js',
     },
     resolve: {
