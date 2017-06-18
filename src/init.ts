@@ -6,6 +6,7 @@ require("jquery-mousewheel");
 
 import forEach = require("lodash.foreach");
 const BootstrapDialog = require("bootstrap3-dialog");
+import hljs = require("highlight.js");
 import * as PIXI from "pixi.js";
 const createDropShadowFilter = require("./pixi/createDropShadowFilter");
 
@@ -56,7 +57,8 @@ $(function () {
     const iconCropper = new IconCropper();
     iconCropper.init($("#main-site-container").get(0));
 
-    const blueprintRenderer = new BlueprintRenderer(factorioBlueprintReader, animationHandler, zoomAndPanHandler, keyboardHandler);
+    const blueprintRenderer = new BlueprintRenderer(factorioBlueprintReader, animationHandler, keyboardHandler);
+    blueprintRenderer.on("entityclicked", showEntityDialog);
 
     var stage = new PIXI.Container();
     var graphics = new PIXI.Graphics();
@@ -71,6 +73,7 @@ $(function () {
     positionBackground.lineStyle(0, 0x000000);
     positionBackground.drawRect(0, 0, STATUS_WIDTH, STATUS_HEIGHT);
     bottomStatus.addChild(positionBackground);
+
     var statusText = new PIXI.Text("(0, 0)", new PIXI.TextStyle({
         align: 'right',
         fontFamily: 'Arial',
@@ -81,7 +84,7 @@ $(function () {
     statusText.y = 2;
     bottomStatus.addChild(statusText);
 
-    zoomAndPanHandler.setOnMousePositionChanged(function (x, y) {
+    zoomAndPanHandler.setOnMousePositionChanged((x, y) => {
         statusText.text = '(' + Math.floor(x / window.FBR_PIXELS_PER_TILE) + ', ' + Math.floor(y / window.FBR_PIXELS_PER_TILE) + ')';
     });
 
@@ -89,7 +92,7 @@ $(function () {
 
     PIXI.loader
         .add(FBR_DEV ? loader.getImagesToLoad() : './images/spritesheet.json')
-        .on("progress", function (loader /*, resource*/) {
+        .on("progress", (loader /*, resource*/) => {
 
             // var url = resource.url;
             // var name = resource.name;
@@ -106,8 +109,6 @@ $(function () {
             stage.removeChild(graphics);
             stage.addChild(gameContainer);
             stage.addChild(bottomStatus);
-            // todo: cannot set to null, maybe destroy() was the intention?
-            // graphics = null;
             graphics.destroy(); // check if this works
 
             if (FBR_DEV) {
@@ -131,12 +132,12 @@ $(function () {
             function redraw() {
                 const containerToDestroy = blueprintContainer;
 
-                setTimeout(function () {
+                setTimeout(() => {
                     gameContainer.removeChild(containerToDestroy);
                     containerToDestroy.destroy({ children: true });
                 }, 0);
 
-                factorioBlueprintReader.loadEntities();
+                // factorioBlueprintReader.loadEntities();
 
                 if (blueprintData.data.blueprint) {
                     $("#blueprint-recipe-selector").hide();
@@ -155,7 +156,6 @@ $(function () {
                 }
 
                 zoomAndPanHandler.setContainer(blueprintContainer);
-
                 gameContainer.addChild(blueprintContainer);
             }
 
@@ -170,6 +170,25 @@ $(function () {
             );
         });
 });
+
+function showEntityDialog(entity: BlueprintEntity) {
+    BootstrapDialog.show({
+        title: entity.name,
+        animate: false,
+        message: '<pre class="json">' + JSON.stringify(entity, null, '    ') + '</pre>',
+        buttons: [{
+            label: 'OK',
+            action: (dialogRef: any) => {
+                dialogRef.close();
+            }
+        }],
+        onshown: (/*dialogRef: any*/) => {
+            $('pre.json').each((_, block) => {
+                hljs.highlightBlock(block);
+            });
+        }
+    });
+}
 
 function initButtons(
     factorioBlueprintReader: FactorioBlueprintReader,

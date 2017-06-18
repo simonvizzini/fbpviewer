@@ -226,11 +226,11 @@ export default class ZoomAndPanHandler implements IZoomAndPanHandler {
 
     init(canvas: HTMLCanvasElement) {
         $(canvas).mousewheel(this.onMouseWheel.bind(this));
-        $(canvas).on('vmousedown', this.onMouseDown.bind(this));
-        $(canvas).on('vmouseup', this.onMouseUp.bind(this));
-        $(canvas).on('vmouseout', this.onMouseOut.bind(this));
-        $(canvas).on('vmousemove', this.onMouseMove.bind(this));
-        var hammertime = new Hammer($(canvas).get(0));
+        $(canvas).on('mousedown', this.onMouseDown.bind(this));
+        $(canvas).on('mouseup', this.onMouseUp.bind(this));
+        $(canvas).on('mouseout', this.onMouseOut.bind(this));
+        $(canvas).on('mousemove', this.onMouseMove.bind(this));
+        var hammertime = new Hammer(canvas);
         hammertime.get('pinch').set({ enable: true });
         hammertime.on('pinch', this.onHammerPinch.bind(this));
         this.canvasWidth = canvas.width;

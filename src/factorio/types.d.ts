@@ -89,10 +89,10 @@ type BlueprintEntity = {
     control_behavior?: EntityControlBehavior;
 }
 
-type BlueprintTile = {
-    name:     string;
-    position: Coords;
-}
+// type BlueprintTile = {
+//     name:     string;
+//     position: Coords;
+// }
 
 type Blueprint = {
     item:     string;
@@ -100,7 +100,7 @@ type Blueprint = {
     version:  number;
     icons:    BlueprintIcon[];
     entities: BlueprintEntity[];
-    tiles?:   BlueprintTile[];
+    tiles?:   BlueprintEntity[];
 }
 
 type BlueprintBookEntry = {

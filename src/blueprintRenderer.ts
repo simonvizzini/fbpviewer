@@ -1,24 +1,23 @@
+import { EventEmitter } from "events";
 import forEach = require("lodash.foreach");
 import merge = require("lodash.merge");
-const BootstrapDialog = require("bootstrap3-dialog");
-import hljs = require("highlight.js");
-const ColorFillShader = require("./pixi/createColorFillShader.js");
 
+const ColorFillShader = require("./pixi/createColorFillShader.js");
 import { IFactorioBlueprintReader } from "./factorioBlueprintReader";
 import { IAnimationHandler } from "./animationHandler";
-import { IZoomAndPanHandler } from "./zoomAndPanHandler";
 import { IKeyboardHandler } from "./keyboardHandler";
 
-export default class BlueprintRenderer {
+export default class BlueprintRenderer extends EventEmitter {
     private DEFAULT_LAYER = 100;
     private OVERLAY_LAYER = 200;
 
     constructor(
         private factorioBlueprintReader: IFactorioBlueprintReader,
         private animationHandler: IAnimationHandler,
-        private zoomAndPanHandler: IZoomAndPanHandler,
         private keyboardHandler: IKeyboardHandler
-    ) { }
+    ) {
+        super();
+    }
 
     private getRandomInt(min: number, max: number) {
         min = Math.ceil(min);
@@ -48,7 +47,7 @@ export default class BlueprintRenderer {
         return entityDrawingSpec;
     }
 
-    createEntityLayers(entityImageSpec: Image, entitySpec?: any) { // figure out what is entitySpec
+    createEntityLayers(entityImageSpec: Image, entity?: BlueprintEntity, entitySpec?: any) { // figure out what is entitySpec
         var layerSprites: Dict<PIXI.Sprite> = {};
 
         if (entityImageSpec.type == 'sprite') {
@@ -77,7 +76,7 @@ export default class BlueprintRenderer {
         } else if (entityImageSpec.type == 'container' && entityImageSpec.images !== undefined) {
             for (var imageKey in entityImageSpec.images) {
                 if (entityImageSpec.images.hasOwnProperty(imageKey)) {
-                    var entityLayers = this.createEntityLayers(entityImageSpec.images[imageKey], entitySpec);
+                    var entityLayers = this.createEntityLayers(entityImageSpec.images[imageKey], entity, entitySpec);
                     forEach(entityLayers, (entityLayer: PIXI.Sprite, layer: string) => {
                         // TODO: Proper TS types to avoid this
                         entityLayer.x = (entityImageSpec.images && entityImageSpec.images[imageKey].x as number) || 0;
@@ -120,6 +119,15 @@ export default class BlueprintRenderer {
                 }
                 layerSprite.filters = [new ColorFillShader(color)];
                 layerSprite.alpha = alpha;
+            }
+
+            if (entity) {
+                layerSprite.interactive = true;
+                layerSprite.on("mousedown", (e: any) => {
+                    e.stopped = true;
+                    console.log("sprite mousedown: ", e, entity);
+                    this.emit("entityclicked", entity);
+                })
             }
         });
 
@@ -230,7 +238,9 @@ export default class BlueprintRenderer {
         } else if (entity.request_filters) {
             filters = entity.request_filters;
         }
+
         var filterItemNumber = 0;
+
         forEach(filters, (filterItem: EntityFilter | EntityRequestFilter) => {
             if (!this.factorioBlueprintReader.icons[filterItem.name]) {
                 console.log('Can\'t find icon for item', filterItem.name);
@@ -330,7 +340,7 @@ export default class BlueprintRenderer {
                     number = number % (1 + max - min);
                     return number + min;
                 };
-                spriteLayers = this.createEntityLayers(this.factorioBlueprintReader.tiles[entity.name].image as Image);
+                spriteLayers = this.createEntityLayers(this.factorioBlueprintReader.tiles[entity.name].image as Image, entity);
                 this.getRandomInt = prevRandomInt;
             } else {
                 console.log("Unknown tile name", entity.name);
@@ -408,7 +418,6 @@ export default class BlueprintRenderer {
             var targetPosition = getCircuitXYTargetFromEntity(targetEntity, targetCircuitId);
             circuitryLayer.moveTo(startPosition.x, startPosition.y);
             circuitryLayer.bezierCurveTo(startPosition.x - 10, startPosition.y + 10, targetPosition.x + 10, targetPosition.y + 10, targetPosition.x, targetPosition.y);
-
         }
 
         forEach(entities, (entity) => {
@@ -430,52 +439,6 @@ export default class BlueprintRenderer {
         });
 
         blueprintContainer.addChild(circuitryLayer);
-
-
-        this.zoomAndPanHandler.setOnMouseClickListener((x, y) => {
-            x = Math.floor(x / window.FBR_PIXELS_PER_TILE);
-            y = Math.floor(y / window.FBR_PIXELS_PER_TILE);
-            /*$.each(tiles, function (key, entity) {
-             var gridX = Math.floor(entity.position.x - minXY - 0.5);
-             var gridY = Math.floor(entity.position.y - minXY - 0.5);
-             if (gridX == x && gridY == y) {
-             console.log('tile', entity.name, '(' + x + ', ' + y + ')', entity);
-             }
-             });*/
-
-
-            forEach(entities, (entity) => {
-                var sizeW = 1;
-                var sizeH = 1;
-                var entityDrawingSpec = this.getEntityDrawingSpecForEntity(entity);
-                if (entityDrawingSpec) {
-                    sizeW = (entityDrawingSpec.gridSize as Size).w;
-                    sizeH = (entityDrawingSpec.gridSize as Size).h;
-                }
-                var gridX = Math.floor(entity.position.x - minXY - sizeW / 2);
-                var gridY = Math.floor(entity.position.y - minXY - sizeH / 2);
-                if (x >= gridX && x < gridX + sizeW && y >= gridY && y < gridY + sizeH) {
-                    BootstrapDialog.show({
-                        title:   entity.name,
-                        animate: false,
-                        message: '<pre class="json">' + JSON.stringify(entity, null, '    ') + '</pre>',
-                        buttons: [{
-                            label:  'OK',
-                            action: (dialogRef: any) => {
-                                dialogRef.close();
-                            }
-                        }],
-                        onshown: (/*dialogRef: any*/) => {
-                            $('pre.json').each((_, block) => {
-                                hljs.highlightBlock(block);
-                            });
-                        }
-                    });
-                }
-            });
-
-            //console.log(x, y);
-        });
 
         return blueprintContainer;
     }
