@@ -33,7 +33,7 @@ export default class BlueprintRenderer {
         return a < 0 && b < 0 || a >= 0 && b >= 0 ? C : -C - 1;
     }
 
-    getEntityDrawingSpecForEntity(entity: BlueprintEntity) {
+    private getEntityDrawingSpecForEntity(entity: BlueprintEntity) {
         var entityDrawingSpec = this.factorioBlueprintReader.entities[entity.name];
         if (!entityDrawingSpec) {
             return null;
@@ -126,7 +126,7 @@ export default class BlueprintRenderer {
         return layerSprites;
     }
 
-    drawLayers(destinationLayers: Dict<PIXI.Container>, sourceLayers: Dict<PIXI.Sprite | PIXI.Graphics>, gridX: number, gridY: number, xOffset: number, yOffset: number) {
+    private drawLayers(destinationLayers: Dict<PIXI.Container>, sourceLayers: Dict<PIXI.Sprite | PIXI.Graphics>, gridX: number, gridY: number, xOffset: number, yOffset: number) {
         forEach(sourceLayers, (spriteLayer: PIXI.Sprite, layerNumber: string) => {
             spriteLayer.x = gridX * window.FBR_PIXELS_PER_TILE + xOffset;
             spriteLayer.y = gridY * window.FBR_PIXELS_PER_TILE + yOffset;
@@ -135,7 +135,7 @@ export default class BlueprintRenderer {
         });
     }
 
-    createIconSprite(imageSpec: Image) {
+    private createIconSprite(imageSpec: Image) {
         var iconLayers = this.createEntityLayers(imageSpec);
         var darkBackground = new PIXI.Sprite(PIXI.Texture.fromFrame(window.FBR_IMAGES_PREFIX + this.factorioBlueprintReader.ImagesUI.INFO_DARK_BACKGROUND));
         darkBackground.anchor.x = 0.5;
@@ -145,7 +145,7 @@ export default class BlueprintRenderer {
         return iconLayers;
     }
 
-    renderEntityToLayers(layers: Dict<PIXI.Container>, minXY: number, entity: BlueprintEntity) {
+    private renderEntityToLayers(layers: Dict<PIXI.Container>, minXY: number, entity: BlueprintEntity) {
         var spriteLayers: Dict<PIXI.Graphics | PIXI.Sprite> = {};
         var sizeW = 0;
         var sizeH = 0;
