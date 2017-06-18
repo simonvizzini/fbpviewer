@@ -157,6 +157,8 @@ export default class ZoomAndPanHandler implements IZoomAndPanHandler {
         }
 
         if (this.lastPosition && this.movedBy < 40) {
+            // this used to open the entity dialog
+            // todo: handle movedBy in the "entityclicked" event
             // var worldPosition = this.getWorldPosition(offsetX, offsetY);
             // setTimeout(() => {
             //     this.onMouseClickListener(Math.round(worldPosition.x), Math.round(worldPosition.y));
@@ -171,6 +173,10 @@ export default class ZoomAndPanHandler implements IZoomAndPanHandler {
     }
 
     private onMouseMove(event: JQuery.Event<HTMLCanvasElement>) {
+        if (!this.pixiContainer) {
+            return;
+        }
+
         let offsetX = event.offsetX;
         let offsetY = event.offsetY;
 
@@ -179,10 +185,6 @@ export default class ZoomAndPanHandler implements IZoomAndPanHandler {
             let rect = target.getBoundingClientRect();
             offsetX = (event.clientX || 0) - rect.left,
             offsetY = (event.clientY || 0) - rect.top;
-        }
-
-        if (!this.pixiContainer) {
-            return;
         }
 
         if (this.lastPosition) {

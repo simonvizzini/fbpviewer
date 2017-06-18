@@ -277,18 +277,21 @@ export default class BlueprintRenderer extends EventEmitter {
                 yOffset = (Math.floor(filterItemNumber % 4 / 2) * 16) + (this.factorioBlueprintReader.iconSize * 0.2);
                 this.drawLayers(layers, iconLayers, gridX, gridY, xOffset, yOffset);
                 // if there's more than 4, cycle between them every 2 seconds; also hide if alt is pressed
-                var everyNSeconds = 5;
-                var currentFilterItemNumber = filterItemNumber;
-                this.addOnSecondTickListener((second) => {
-                    forEach(iconLayers, (layerContainer: PIXI.Container) => {
-                        var altPressed = this.keyboardHandler.isPressed(this.keyboardHandler.keys.alt);
-                        layerContainer.visible = (!altPressed) && Math.floor(second / everyNSeconds) % (Math.ceil(filters.length / 4)) == Math.floor(currentFilterItemNumber / 4);
+                if (Object.keys(iconLayers).length > 4) {
+                    var everyNSeconds = 5;
+                    var currentFilterItemNumber = filterItemNumber;
+                    // todo: not exactly sure what is supposed to happen here,
+                    // the handler is also never removed
+                    this.addOnSecondTickListener((second) => {
+                        forEach(iconLayers, (layerContainer: PIXI.Container) => {
+                            var altPressed = this.keyboardHandler.isPressed(this.keyboardHandler.keys.alt);
+                            layerContainer.visible = (!altPressed) && Math.floor(second / everyNSeconds) % (Math.ceil(filters.length / 4)) == Math.floor(currentFilterItemNumber / 4);
+                        });
                     });
-                });
+                }
             }
             filterItemNumber++;
         });
-
     }
 
     renderBlueprint(/*pixiRenderer: any, stage: any,*/ blueprintData: BlueprintBookEntry) {
