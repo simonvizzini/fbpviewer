@@ -23,11 +23,9 @@ window.FBR_IMAGES_PREFIX = FBR_DEV ? "/images/factorio/" : "images/factorio/";
 window.FBR_PIXELS_PER_TILE = 32;
 window.FBR_CANVAS_WIDTH = 0;
 window.FBR_CANVAS_HEIGHT = 0;
-
-const FBR_INITIAL_BLUEPRINT = require("../entities.json");
-
+const FBR_INITIAL_BLUEPRINT = window.FBR_INITIAL_BLUEPRINT // is currently the blueprintbook as object, convert back to string later
 let currentBlueprintIndex = 0;
-let currentBlueprintString = ""; // FBR_INITIAL_BLUEPRINT;
+let currentBlueprintString = "";
 
 $(function () {
     createDropShadowFilter();
@@ -50,9 +48,6 @@ $(function () {
     const animationHandler = new AnimationHandler();
     const keyboardHandler = new KeyboardHandler();
     const loader = new Loader(factorioBlueprintReader);
-
-    const zoomAndPanHandler = new ZoomAndPanHandler(keyboardHandler);
-    zoomAndPanHandler.init(renderer.view);
 
     const iconCropper = new IconCropper();
     iconCropper.init($("#main-site-container").get(0));
@@ -84,6 +79,8 @@ $(function () {
     statusText.y = 2;
     bottomStatus.addChild(statusText);
 
+    const zoomAndPanHandler = new ZoomAndPanHandler(keyboardHandler);
+    zoomAndPanHandler.init(renderer.view);
     zoomAndPanHandler.setOnMousePositionChanged((x, y) => {
         statusText.text = '(' + Math.floor(x / window.FBR_PIXELS_PER_TILE) + ', ' + Math.floor(y / window.FBR_PIXELS_PER_TILE) + ')';
     });
@@ -171,7 +168,7 @@ $(function () {
         });
 });
 
-function showEntityDialog(entity: BlueprintEntity) {
+function showEntityDialog(_: PIXI.interaction.InteractionEvent, entity: BlueprintEntity) {
     BootstrapDialog.show({
         title: entity.name,
         animate: false,

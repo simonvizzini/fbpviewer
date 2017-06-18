@@ -126,7 +126,7 @@ export default class BlueprintRenderer extends EventEmitter {
                 layerSprite.on("mousedown", (e: any) => {
                     e.stopped = true;
                     console.log("sprite mousedown: ", e, entity);
-                    this.emit("entityclicked", entity);
+                    this.emit("entityclicked", e, entity);
                 })
             }
         });

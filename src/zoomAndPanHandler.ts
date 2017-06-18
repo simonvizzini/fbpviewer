@@ -157,10 +157,10 @@ export default class ZoomAndPanHandler implements IZoomAndPanHandler {
         }
 
         if (this.lastPosition && this.movedBy < 40) {
-            var worldPosition = this.getWorldPosition(offsetX, offsetY);
-            setTimeout(() => {
-                this.onMouseClickListener(Math.round(worldPosition.x), Math.round(worldPosition.y));
-            }, 100);
+            // var worldPosition = this.getWorldPosition(offsetX, offsetY);
+            // setTimeout(() => {
+            //     this.onMouseClickListener(Math.round(worldPosition.x), Math.round(worldPosition.y));
+            // }, 100);
         }
         this.lastPosition = null;
     }
