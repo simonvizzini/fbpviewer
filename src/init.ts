@@ -29,25 +29,23 @@ let currentBlueprintString = "";
 function initUi() {
     createDropShadowFilter();
 
-    const STATUS_WIDTH = 100;
-    const STATUS_HEIGHT = 20;
-
     const navbar = document.getElementsByClassName("navbar")[0] as HTMLElement;
-    const CANVAS_WIDTH = window.innerWidth;
-    const CANVAS_HEIGHT = window.innerHeight - navbar.offsetHeight;
+    const view_size: Size = { w: window.innerWidth, h: window.innerHeight - navbar.offsetHeight };
+    const view_ratio = view_size.w / view_size.h;
+    const status_size = { w: 100, h: 20 };
+
     const container = document.getElementById("fbpviewer") as HTMLElement;
     const view: HTMLCanvasElement = document.getElementById("fbp-canvas") as HTMLCanvasElement;
 
-    //var renderer = PIXI.autoDetectRenderer(window.FBR_CANVAS_WIDTH, window.FBR_CANVAS_HEIGHT, { antialias: true, forceFXAA: true } as PIXI.WebGLRendererOptions); // todo: check why the cast is necessary, type definition seems to be incorrect
-    var renderer = PIXI.autoDetectRenderer(CANVAS_WIDTH, CANVAS_HEIGHT, { view, antialias: true, forceFXAA: true } as PIXI.WebGLRendererOptions); // todo: check why the cast is necessary, type definition seems to be incorrect
-    // const { view } = renderer;
+    var renderer = PIXI.autoDetectRenderer(view_size.w, view_size.h, { view, antialias: true, forceFXAA: true } as PIXI.WebGLRendererOptions); // todo: check why the cast is necessary, type definition seems to be incorrect
     container.appendChild(view);
     // todo: type definition says there is no backgroundColor?
     // renderer.backgroundColor = 0x000000;
-    (global as any)._renderer = renderer;
-    window.FBR_CANVAS_WIDTH = view.width; //$("#main-site-container").width() - 5;
-    window.FBR_CANVAS_HEIGHT = view.height; //$(window).height() - $(".nav").height() - 5;
-    // $("#main-site-container").get(0).appendChild(renderer.view);
+
+    // for debug purposes
+    (window as any)._renderer = renderer;
+    window.FBR_CANVAS_WIDTH = view.width;
+    window.FBR_CANVAS_HEIGHT = view.height;
 
     const factorioBlueprintReader = new FactorioBlueprintReader();
     factorioBlueprintReader.loadEntities();
@@ -68,7 +66,7 @@ function initUi() {
     var positionBackground = new PIXI.Graphics();
     positionBackground.beginFill(0xCCCCCC);
     positionBackground.lineStyle(0, 0x000000);
-    positionBackground.drawRect(0, 0, STATUS_WIDTH, STATUS_HEIGHT);
+    positionBackground.drawRect(0, 0, status_size.w, status_size.h);
     bottomStatus.addChild(positionBackground);
 
     var statusText = new PIXI.Text("(0, 0)", new PIXI.TextStyle({
@@ -78,12 +76,12 @@ function initUi() {
     }));
 
     statusText.anchor.set(1, 0);
-    statusText.x = STATUS_WIDTH - 10;
+    statusText.x = status_size.w - 10;
     statusText.y = 2;
     bottomStatus.addChild(statusText);
 
     const zoomAndPanHandler = new ZoomAndPanHandler(keyboardHandler);
-    zoomAndPanHandler.init(renderer.view);
+    zoomAndPanHandler.init(view);
     zoomAndPanHandler.setOnMousePositionChanged((x, y) => {
         statusText.text = '(' + Math.floor(x / window.FBR_PIXELS_PER_TILE) + ', ' + Math.floor(y / window.FBR_PIXELS_PER_TILE) + ')';
     });
@@ -93,21 +91,43 @@ function initUi() {
     var graphics = new PIXI.Graphics();
     stage.addChild(graphics);
 
+    function resize() {
+        const navbar = document.getElementsByClassName("navbar")[0] as HTMLElement;
+        const target_height = window.innerHeight - navbar.offsetHeight;
+
+        if (window.innerWidth / target_height >= view_ratio) {
+            var w = target_height * view_ratio;
+            var h = target_height;
+        } else {
+            var w = target_height;
+            var h = target_height / view_ratio;
+        }
+
+        window.FBR_CANVAS_WIDTH = w;
+        window.FBR_CANVAS_HEIGHT = h;
+        renderer.view.style.width = w + 'px';
+        renderer.view.style.height = h + 'px';
+    }
+
+    window.addEventListener("resize", (_) => {
+        resize();
+    });
+
     PIXI.loader
         .add(FBR_DEV ? loader.getImagesToLoad() : './images/spritesheet.json')
         .on("progress", (loader /*, resource*/) => {
 
             // var url = resource.url;
             // var name = resource.name;
-            // Somehow now progress is visible
+            // Somehow no progress is visible, investigate what's wrong
             // console.log("progress: ", loader.progress)
             graphics.clear();
             graphics.beginFill(0xFFFFFF);
             graphics.lineStyle(5, 0x000000);
-            graphics.drawRect(20, view.height / 2 - 20, view.width - 40, 40);
+            graphics.drawRect(20, renderer.view.height / 2 - 20, renderer.view.width - 40, 40);
 
             graphics.beginFill(0x0000FF);
-            graphics.drawRect(20, view.height / 2 - 20, (view.width - 40) / 100 * loader.progress, 40);
+            graphics.drawRect(20, renderer.view.height / 2 - 20, (renderer.view.width - 40) / 100 * loader.progress, 40);
         })
         .load(() => {
             stage.removeChild(graphics);
@@ -126,6 +146,7 @@ function initUi() {
                 renderer.render(stage);
             }
 
+            resize();
             gameLoop();
 
             var blueprintData = { data: FBR_INITIAL_BLUEPRINT as BlueprintData }; //factorioBlueprintReader.parse(currentBlueprintString);
