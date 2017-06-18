@@ -17,8 +17,8 @@ import KeyboardHandler from "./keyboardHandler";
 import ZoomAndPanHandler from "./zoomAndPanHandler";
 import Loader from "./images/loader";
 
-const FBR_DEV = 0;
-window.FBR_IMAGES_PREFIX = FBR_DEV ? "/images/factorio/" : "images/factorio/";
+const FBR_DEV = 1;
+window.FBR_IMAGES_PREFIX = FBR_DEV ? "/web/images/factorio/" : "images/factorio/";
 window.FBR_PIXELS_PER_TILE = 32;
 window.FBR_CANVAS_WIDTH = 0;
 window.FBR_CANVAS_HEIGHT = 0;
@@ -53,10 +53,6 @@ $(function () {
     const blueprintRenderer = new BlueprintRenderer(factorioBlueprintReader, keyboardHandler);
     blueprintRenderer.on("entityclicked", showEntityDialog);
 
-    var stage = new PIXI.Container();
-    var graphics = new PIXI.Graphics();
-    stage.addChild(graphics);
-
     var bottomStatus = new PIXI.Container();
     bottomStatus.x = window.FBR_CANVAS_WIDTH - 100;
     bottomStatus.y = window.FBR_CANVAS_HEIGHT - 20;
@@ -84,6 +80,9 @@ $(function () {
     });
 
     var gameContainer = new PIXI.Container();
+    var stage = new PIXI.Container();
+    var graphics = new PIXI.Graphics();
+    stage.addChild(graphics);
 
     PIXI.loader
         .add(FBR_DEV ? loader.getImagesToLoad() : './images/spritesheet.json')
@@ -91,7 +90,7 @@ $(function () {
 
             // var url = resource.url;
             // var name = resource.name;
-
+            console.log("progress: ", loader.progress)
             graphics.clear();
             graphics.beginFill(0xFFFFFF);
             graphics.lineStyle(5, 0x000000);
@@ -100,7 +99,7 @@ $(function () {
             graphics.beginFill(0x0000FF);
             graphics.drawRect(20, window.FBR_CANVAS_HEIGHT / 2 - 20, (window.FBR_CANVAS_WIDTH - 40) / 100 * loader.progress, 40);
         })
-        .load(function () {
+        .load(() => {
             stage.removeChild(graphics);
             stage.addChild(gameContainer);
             stage.addChild(bottomStatus);
@@ -131,8 +130,6 @@ $(function () {
                     gameContainer.removeChild(containerToDestroy);
                     containerToDestroy.destroy({ children: true });
                 }, 0);
-
-                // factorioBlueprintReader.loadEntities();
 
                 if (blueprintData.data.blueprint) {
                     $("#blueprint-recipe-selector").hide();
@@ -170,7 +167,7 @@ function showEntityDialog(_: PIXI.interaction.InteractionEvent, entity: Blueprin
     BootstrapDialog.show({
         title: entity.name,
         animate: false,
-        message: '<pre class="json">' + JSON.stringify(entity, null, '    ') + '</pre>',
+        message: '<pre class="json">' + JSON.stringify(entity, null, 4) + '</pre>',
         buttons: [{
             label: 'OK',
             action: (dialogRef: any) => {

@@ -27,8 +27,8 @@ export default class Loader {
 
     _prepareTrimmedTexturesFromImageData(imageData: Image) {
         var imagePath = window.FBR_IMAGES_PREFIX + imageData.path;
-        if (imageData.type == 'trim' && imageData.rows && imageData.cols && imageData.number) { // todo: there is a TS feature that can handle this... have to find out which
-            this._prepareTrimmedTexture(imagePath, imageData.rows, imageData.cols, imageData.number);
+        if (imageData.type == 'trim') {
+            this._prepareTrimmedTexture(imagePath, imageData.rows as number, imageData.cols as number, imageData.number as number); // todo: there is a TS feature that can handle this... have to find out which
         } else if (imageData.type == 'animated' || imageData.type == 'random_trim') { // todo
             for (var k = imageData.from as number; k <= (imageData.to as number); k++) {
                 this._prepareTrimmedTexture(imagePath, imageData.rows as number, imageData.cols as number, k);
