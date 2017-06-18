@@ -1,6 +1,6 @@
 dist/
-images/factorio/
-images/spritesheet.json
-images/spritesheet.png
+web/images/factorio/
+web/images/spritesheet.json
+web/images/spritesheet.png
 fbpvatlasgen/atlasgen_output/
 node_modules/
