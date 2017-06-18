@@ -1,22 +1,28 @@
 # Factorio Blueprint Viewer (fbpviewer)
 
-This is a simple javascript canvas viewer for factorio blueprints.
+A TypeScript version of the original fbpviewer from [https://github.com/trakos/fbpviewer](https://github.com/trakos/fbpviewer), created by [@trakos](https://github.com/trakos). All credits to him for doing all the hard groundwork.
+Unfortunately he didn't like TS and so I'm continuing my TS conversion. I plan to eventually extend it with new features once there is a solid foundation.
 
-Live version available here: [http://fbpviewer.trakos.pl/](http://fbpviewer.trakos.pl/)
+Contributions welcome! Take a look and see if there is something interesting to do for you...
 
+Live version of the original version available here: [http://fbpviewer.trakos.pl/](http://fbpviewer.trakos.pl/)
+
+Live version of this fork: Coming soon...
 
 ## Development
 
-If you want to run entire website, I recommend having docker installed. Then, you can simply run:
+You need to have node.js installed, then it's as simple as:
 
 ```
-docker-compose up -d
-bash bin/dev_init.sh
+npm install
+npm run dev
 ```
 
-You'd also have to add `php-docker.local` to your hosts file (to make it point to docker machine, if you're using docker-machine you can find it's ip by calling `docker-machine ip`, otherwise it's probably localhost).
+You only need to execute ``npm install`` once initially and after package updates (defined as dependencies in ``package.json``). Then open a browser and visit [http://localhost:8080/web](http://localhost:8080/web) (browser will automatically refresh on file change)
 
-You also have to have spritesheet generated. The best way is to simply download it from my website (both `spritesheet.json` and `spritesheet.png`) and put it in `/web/images`.
+I suggest VS Code for the best TypeScript development experience.
+
+You also have to have spritesheet generated. The best way is to simply download it from [http://fbpviewer.trakos.pl/](http://fbpviewer.trakos.pl/) (both `spritesheet.json` and `spritesheet.png`) and put it in `/web/images`.
 
 You could also use the script at `bin/dev_atlasgen.sh` to generate it yourself, but it requires you to copy most of the factorio images to `web/images/factorio` first.
 
