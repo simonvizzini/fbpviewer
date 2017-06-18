@@ -5,34 +5,29 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>FBPViewer</title>
+    <style>
+        body {
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        button {
+            font-size: 16px;
+        }
+        #navbar > * {
+            padding: 2px;
+            margin: 4px;
+        }
+        #blueprint-recipe-selector {
+            min-width: 230px;
+        }
+    </style>
 </head>
-<body style="overflow: hidden;">
-    <nav class="navbar navbar-inverse" style="margin-bottom: 0">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false"
-                    aria-controls="navbar">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="#">FBPViewer</a>
-            </div>
-            <div id="navbar" class="collapse navbar-collapse">
-                <ul class="nav navbar-nav">
-                    <li><a href="#" id="show-blueprint-string-button">Show blueprint string</a></li>
-                    <li><a href="#" id="load-blueprint-button">Load new blueprint...</a></li>
-                    <li><a href="#" id="share-blueprint-button">Share</a></li>
-                    <li class="dropdown" id="blueprint-recipe-selector">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Select blueprint from a book <span class="caret"></span></a>
-                        <ul class="dropdown-menu" style="overflow-y: auto; max-height: 400px;">
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-            <!--/.nav-collapse -->
-        </div>
+<body>
+    <nav id="navbar">
+        <select id="blueprint-recipe-selector"></select>
+        <button type="button" id="show-blueprint-string-button">Show blueprint string</button>
+        <button type="button" id="load-blueprint-button">Load new blueprint...</button>
     </nav>
 
     <div id="fbpviewer">
@@ -42,5 +37,4 @@
     <script src="./default_blueprintbook.js"></script>
     <script src="../dist/fbpviewer.bundle.js"></script>
 </body>
-
 </html>

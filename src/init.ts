@@ -1,11 +1,6 @@
-import "bootstrap/dist/css/bootstrap.css";
-import "bootstrap/dist/css/bootstrap-theme.css";
-
-require("bootstrap");
 require("jquery-mousewheel");
 
-import forEach = require("lodash.foreach");
-const BootstrapDialog = require("bootstrap3-dialog");
+// import forEach = require("lodash.foreach");
 import * as PIXI from "pixi.js";
 const createDropShadowFilter = require("./pixi/createDropShadowFilter");
 
@@ -21,14 +16,14 @@ window.FBR_IMAGES_PREFIX = FBR_DEV ? "/web/images/factorio/" : "images/factorio/
 window.FBR_PIXELS_PER_TILE = 32;
 window.FBR_CANVAS_WIDTH = 0;
 window.FBR_CANVAS_HEIGHT = 0;
-const FBR_INITIAL_BLUEPRINT = window.FBR_INITIAL_BLUEPRINT // is currently the blueprintbook as object, convert back to string later
+let currentBlueprintData = { data: window.FBR_INITIAL_BLUEPRINT, version: "1" }; // is currently the blueprintbook as object, convert back to string later
 let currentBlueprintIndex = 0;
 let currentBlueprintString = "";
 
 function initUi() {
     createDropShadowFilter();
 
-    const navbar = document.getElementsByClassName("navbar")[0] as HTMLElement;
+    const navbar = document.getElementById("navbar") as HTMLElement;
     const view_size: Size = { w: window.innerWidth, h: window.innerHeight - navbar.offsetHeight };
     const view_ratio = view_size.w / view_size.h;
     const status_size = { w: 100, h: 20 };
@@ -36,7 +31,7 @@ function initUi() {
     const container = document.getElementById("fbpviewer") as HTMLElement;
     const view: HTMLCanvasElement = document.getElementById("fbp-canvas") as HTMLCanvasElement;
 
-    var renderer = PIXI.autoDetectRenderer(view_size.w, view_size.h, { view, antialias: true, forceFXAA: true } as PIXI.WebGLRendererOptions); // todo: check why the cast is necessary, type definition seems to be incorrect
+    const renderer = PIXI.autoDetectRenderer(view_size.w, view_size.h, { view, antialias: true, forceFXAA: true } as PIXI.WebGLRendererOptions); // todo: check why the cast is necessary, type definition seems to be incorrect
     container.appendChild(view);
     // todo: type definition says there is no backgroundColor?
     // renderer.backgroundColor = 0x000000;
@@ -58,17 +53,17 @@ function initUi() {
     const blueprintRenderer = new BlueprintRenderer(factorioBlueprintReader, keyboardHandler);
     blueprintRenderer.on("entityclicked", showEntityDialog);
 
-    var bottomStatus = new PIXI.Container();
+    const bottomStatus = new PIXI.Container();
     bottomStatus.x = view.width - 100;
     bottomStatus.y = view.height - 20;
 
-    var positionBackground = new PIXI.Graphics();
+    const positionBackground = new PIXI.Graphics();
     positionBackground.beginFill(0xCCCCCC);
     positionBackground.lineStyle(0, 0x000000);
     positionBackground.drawRect(0, 0, status_size.w, status_size.h);
     bottomStatus.addChild(positionBackground);
 
-    var statusText = new PIXI.Text("(0, 0)", new PIXI.TextStyle({
+    const statusText = new PIXI.Text("(0, 0)", new PIXI.TextStyle({
         align: 'right',
         fontFamily: 'Arial',
         fontSize: 10
@@ -85,13 +80,13 @@ function initUi() {
         statusText.text = '(' + Math.floor(x / window.FBR_PIXELS_PER_TILE) + ', ' + Math.floor(y / window.FBR_PIXELS_PER_TILE) + ')';
     });
 
-    var gameContainer = new PIXI.Container();
-    var stage = new PIXI.Container();
-    var graphics = new PIXI.Graphics();
+    const gameContainer = new PIXI.Container();
+    const stage = new PIXI.Container();
+    const graphics = new PIXI.Graphics();
     stage.addChild(graphics);
 
     function resize() {
-        const navbar = document.getElementsByClassName("navbar")[0] as HTMLElement;
+        const navbar = document.getElementById("navbar") as HTMLElement;
         const target_height = window.innerHeight - navbar.offsetHeight;
 
         if (window.innerWidth / target_height >= view_ratio) {
@@ -115,9 +110,6 @@ function initUi() {
     PIXI.loader
         .add(FBR_DEV ? loader.getImagesToLoad() : './images/spritesheet.json')
         .on("progress", (loader /*, resource*/) => {
-
-            // var url = resource.url;
-            // var name = resource.name;
             // Somehow no progress is visible, investigate what's wrong
             // console.log("progress: ", loader.progress)
             graphics.clear();
@@ -138,6 +130,40 @@ function initUi() {
                 loader.prepareTrimmedTextures();
             }
 
+            let blueprintContainer: PIXI.Container | undefined;
+
+            const dropdown = initBlueprintDropdown(
+                "blueprint-recipe-selector",
+                (index: number) => {
+                    currentBlueprintIndex = index;
+                    redraw();
+                }
+            );
+
+            if (currentBlueprintData.data.blueprint_book) {
+                dropdown.setItems(currentBlueprintData.data.blueprint_book.blueprints);
+            }
+
+            function redraw() {
+                if (blueprintContainer) {
+                    gameContainer.removeChild(blueprintContainer);
+                    blueprintContainer.destroy({ children: true });
+                }
+
+                if (currentBlueprintData.data.blueprint) {
+                    dropdown.hide();
+                    blueprintContainer = blueprintRenderer.renderBlueprint(currentBlueprintData.data.blueprint);
+                } else if (currentBlueprintData.data.blueprint_book) {
+                    dropdown.show();
+                    blueprintContainer = blueprintRenderer.renderBlueprint(currentBlueprintData.data.blueprint_book.blueprints[currentBlueprintIndex].blueprint);
+                }
+
+                if (blueprintContainer) {
+                    zoomAndPanHandler.setContainer(blueprintContainer);
+                    gameContainer.addChild(blueprintContainer);
+                }
+            }
+
             function gameLoop() {
                 requestAnimationFrame(gameLoop);
                 zoomAndPanHandler.handleKeyboardPanning();
@@ -145,54 +171,11 @@ function initUi() {
                 renderer.render(stage);
             }
 
-            resize();
+            redraw();
             gameLoop();
 
-            var blueprintData = { data: FBR_INITIAL_BLUEPRINT as BlueprintData }; //factorioBlueprintReader.parse(currentBlueprintString);
-            var blueprintContainer = new PIXI.Container();
-            zoomAndPanHandler.setContainer(blueprintContainer);
-            gameContainer.addChild(blueprintContainer);
-
-            function redraw() {
-                const containerToDestroy = blueprintContainer;
-
-                setTimeout(() => {
-                    gameContainer.removeChild(containerToDestroy);
-                    containerToDestroy.destroy({ children: true });
-                }, 0);
-
-                if (blueprintData.data.blueprint) {
-                    $("#blueprint-recipe-selector").hide();
-                    blueprintContainer = blueprintRenderer.renderBlueprint((blueprintData.data as BlueprintBookEntry));
-                } else if (blueprintData.data.blueprint_book) {
-                    $("#blueprint-recipe-selector").show();
-                    blueprintContainer = blueprintRenderer.renderBlueprint(blueprintData.data.blueprint_book.blueprints[currentBlueprintIndex]);
-
-                    initBlueprintDropdown(
-                        factorioBlueprintReader,
-                        blueprintData.data.blueprint_book,
-                        blueprintRenderer,
-                        iconCropper,
-                        (index: number) => {
-                            currentBlueprintIndex = index;
-                            redraw();
-                        }
-                    );
-                }
-
-                zoomAndPanHandler.setContainer(blueprintContainer);
-                gameContainer.addChild(blueprintContainer);
-            }
-
-            setTimeout(() => {
-                redraw();
-            }, 0);
-
-            initButtons(
-                factorioBlueprintReader,
-                blueprintData,
-                redraw
-            );
+            initShowStringButton(factorioBlueprintReader);
+            initLoadBlueprintButton(factorioBlueprintReader,redraw);
         });
 }
 
@@ -201,143 +184,72 @@ $(function () {
 });
 
 function showEntityDialog(_: PIXI.interaction.InteractionEvent, entity: BlueprintEntity) {
-    BootstrapDialog.show({
-        title: entity.name,
-        animate: false,
-        message: '<pre class="json">' + JSON.stringify(entity, null, 4) + '</pre>',
-        buttons: [{
-            label: 'OK',
-            action: (dialogRef: any) => {
-                dialogRef.close();
-            }
-        }]
+    alert(JSON.stringify(entity, null, 4));
+}
+
+function initShowStringButton(factorioBlueprintReader: FactorioBlueprintReader) {
+    (document.getElementById("show-blueprint-string-button") as HTMLElement).addEventListener("click", () => {
+        if (currentBlueprintData) {
+            prompt("current blueprint string:", factorioBlueprintReader.stringify(currentBlueprintData));
+        }
     });
 }
 
-function initButtons(
+function initLoadBlueprintButton(
     factorioBlueprintReader: FactorioBlueprintReader,
-    blueprintData: { data: BlueprintData },
     redraw: () => void
 ) {
-    $("#show-blueprint-string-button").click(() => {
-        BootstrapDialog.show({
-            title: "Blueprint string",
-            message: '<div class="form-group"><textarea id="factorio-blueprint-output" class="form-control" onClick="this.setSelectionRange(0, this.value.length)" rows="5"></textarea></div>',
-            onshown: () => {
-                $('#factorio-blueprint-output')
-                    .val(factorioBlueprintReader.stringify(blueprintData))
-                    .focus()
-                    .select();
-            }
-        });
-    });
-    $("#load-blueprint-button").click(() => {
-        BootstrapDialog.show({
-            title: "Paste blueprint",
-            message: '<div class="input-group">' +
-            '<span class="input-group-addon">BP</span>' +
-            '<input id="factorio-blueprint-input" type="text" class="form-control" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Paste your blueprint here">' +
-            '</div>',
-            buttons: [{
-                label: 'Render',
-                action: (dialogRef: any) => {
-                    var blueprintString = $("#factorio-blueprint-input").val();
-                    try {
-                        var parsed = factorioBlueprintReader.parse(blueprintString as string);
-                    } catch (e) {
-                        alert("Failed parsing the blueprint!");
-                        return;
-                    }
-                    if (!parsed) {
-                        alert("Failed parsing the blueprint!");
-                        return;
-                    }
-                    if (blueprintData.data.blueprint_book && blueprintData.data.blueprint_book.blueprints.length == 0) {
-                        alert("You can't import an empty book!");
-                        return;
-                    }
-                    dialogRef.close();
-                    blueprintData = parsed;
-                    currentBlueprintIndex = 0;
-                    currentBlueprintString = blueprintString as string;
-                    redraw();
-                }
-            }, {
-                label: 'Cancel',
-                action: (dialogRef: any) => {
-                    dialogRef.close();
-                }
-            }],
-            onshown: () => {
-                $('#factorio-blueprint-input').focus();
-                $('#factorio-blueprint-input').select();
-            }
-        });
-    });
-}
+    (document.getElementById("load-blueprint-button") as HTMLElement).addEventListener("click", () => {
+        var blueprintString = prompt("Paste your blueprint string below:");
 
-function initBlueprintDropdown(
-    factorioBlueprintReader: FactorioBlueprintReader,
-    blueprintBook: BlueprintBook,
-    blueprintRenderer: BlueprintRenderer,
-    iconCropper: IconCropper,
-    onClick: (key: number) => void
-) {
-    $('#blueprint-recipe-selector ul').find('li').remove();
-    const options = createBlueprintbookOptions(
-        factorioBlueprintReader,
-        blueprintBook,
-        blueprintRenderer,
-        iconCropper,
-        onClick
-    );
-    forEach(options, (option) => $('#blueprint-recipe-selector ul').append(option));
-}
-
-function createBlueprintbookOptions(
-    factorioBlueprintReader: FactorioBlueprintReader,
-    blueprintBook: BlueprintBook,
-    blueprintRenderer: BlueprintRenderer,
-    iconCropper: IconCropper,
-    onClick: (key: number) => void
-) {
-    return blueprintBook.blueprints.map((value, key: number) => {
-        var icons = '';
-        for (var k = 0; k < 4; k++) {
-            var icon = value.blueprint.icons[k];
-            if (icon) {
-                var signalName = icon.signal.name;
-                if (factorioBlueprintReader.icons[signalName]) {
-                    var imageSpec = factorioBlueprintReader.icons[signalName].image;
-                    var iconSprites = blueprintRenderer.createEntityLayers(imageSpec as Image);
-                    var iconSrc = iconCropper.createIconURL(iconSprites);
-                    icons += '<img src="' + iconSrc + '" />';
-                    continue;
-
-                    /*if (imageSpec.type == 'sprite') {
-                        icons += '<img src="' + FBR_IMAGES_PREFIX + imageSpec.path + '" />';
-                        continue;
-                        } else {
-                        console.log('Icon complex', signalName);
-                        }*/
-                } else {
-                    console.log('Icon not found', signalName);
-                }
-            } else {
-                icons += '<span style="margin-right: 32px;"></span>';
-            }
+        if (!blueprintString) {
+            return;
         }
-        var option = $('<li><a href="#">' + icons + ' ' + value.blueprint.label + '</a></li>');
-        option.click(() => onClick(key));
 
-        if (key === currentBlueprintIndex) {
-            option.addClass('active');
+        let parsed;
+
+        try {
+            parsed = factorioBlueprintReader.parse(blueprintString);
+        } catch (e) {
+            alert("Failed parsing the blueprint!");
+            return;
         }
-        return option;
+
+        if (parsed.data.blueprint_book && parsed.data.blueprint_book.blueprints.length === 0) {
+            alert("You can't import an empty book!");
+            return;
+        }
+
+        currentBlueprintData = parsed;
+        currentBlueprintIndex = 0;
+        currentBlueprintString = blueprintString as string;
+        redraw();
     });
 }
 
-$(document).on("mobileinit", function () {
-    $.mobile.ajaxEnabled = false;
-    $.mobile.loadingMessageTextVisible = false;
-});
+function initBlueprintDropdown(elementId: string, onChange: (index: number) => void) {
+    const dropdown = document.getElementById(elementId);
+
+    if (!dropdown) {
+        throw new Error("select not found: " + elementId);
+    }
+
+    const setItems = (blueprints: BlueprintBookEntry[]) => {
+        const options = blueprints
+            .map((value, key: number) => `<option value="${key}">${value.blueprint.label}</option>`)
+            .join("");
+
+        dropdown.innerHTML = options;
+    }
+
+    dropdown.addEventListener("change", (event) => {
+        const value = parseInt((event.target as HTMLOptionElement).value);
+        onChange(value);
+    });
+
+    return {
+        setItems,
+        hide: () => dropdown.style.display = "none",
+        show: () => dropdown.style.display = "inline-block"
+    }
+}

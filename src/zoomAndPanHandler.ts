@@ -88,6 +88,11 @@ export default class ZoomAndPanHandler implements IZoomAndPanHandler {
             return;
         }
 
+        if (this.pixiContainer.transform === null) {
+            console.log("transform is null");
+            return;
+        }
+
         const keys = this.keyboardHandler.keys;
 
         if (this.keyboardHandler.isPressed(keys.W)) {

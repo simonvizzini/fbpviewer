@@ -137,7 +137,7 @@ interface Window {
     Hammer: HammerStatic;
     FBR_CANVAS_WIDTH: number;
     FBR_CANVAS_HEIGHT: number;
-    FBR_INITIAL_BLUEPRINT: string;
+    FBR_INITIAL_BLUEPRINT: BlueprintData;
     $: JQueryStatic;
     jQuery: JQueryStatic
 }

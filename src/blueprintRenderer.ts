@@ -103,8 +103,8 @@ export default class BlueprintRenderer extends EventEmitter {
                     var entityLayers = this.createEntityLayers(entityImageSpec.images[imageKey], entity, entitySpec);
                     forEach(entityLayers, (entityLayer: PIXI.Sprite, layer: string) => {
                         // TODO: Proper TS types to avoid this
-                        entityLayer.x = (entityImageSpec.images && entityImageSpec.images[imageKey].x as number) || 0;
-                        entityLayer.y = (entityImageSpec.images && entityImageSpec.images[imageKey].y as number) || 0;
+                        entityLayer.x = entityImageSpec.images && (entityImageSpec.images[imageKey].x as number) || 0;
+                        entityLayer.y = entityImageSpec.images && (entityImageSpec.images[imageKey].y as number) || 0;
                         layerSprites[layer] = layerSprites[layer] || new PIXI.Container();
                         layerSprites[layer].addChild(entityLayer);
                     });
@@ -208,7 +208,6 @@ export default class BlueprintRenderer extends EventEmitter {
         var gridY = Math.floor(entity.position.y - minXY - sizeH / 2);
         this.drawLayers(layers, spriteLayers, gridX, gridY, xOffset, yOffset);
 
-
         if (entity.recipe) {
             if (!this.factorioBlueprintReader.icons[entity.recipe]) {
                 console.log('Can\'t find icon for recipe', entity.recipe);
@@ -257,6 +256,7 @@ export default class BlueprintRenderer extends EventEmitter {
         }
 
         var filters: (EntityFilter | EntityRequestFilter)[] = [];
+
         if (entity.filters) {
             filters = entity.filters;
         } else if (entity.request_filters) {
@@ -294,9 +294,9 @@ export default class BlueprintRenderer extends EventEmitter {
         });
     }
 
-    renderBlueprint(/*pixiRenderer: any, stage: any,*/ blueprintData: BlueprintBookEntry) {
-        var entities = blueprintData.blueprint.entities || [];
-        var tiles = blueprintData.blueprint.tiles || [];
+    renderBlueprint(/*pixiRenderer: any, stage: any,*/ blueprint: Blueprint) {
+        var entities = blueprint.entities || [];
+        var tiles = blueprint.tiles || [];
 
         var minXY = 0;
         var maxXY = 0;

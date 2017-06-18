@@ -13,7 +13,7 @@ export interface IFactorioBlueprintReader {
     entities:   { [name: string]: EntityImage };
     createEntitiesFunctions: (() => EntityImageMap)[];
     parse(blueprintString: string): { data: any, version: string }
-    stringify(blueprintData: any): string;
+    stringify(blueprintData: { data: BlueprintData, version: string }): string;
 }
 
 export default class FactorioBlueprintReader implements IFactorioBlueprintReader {
@@ -43,11 +43,11 @@ export default class FactorioBlueprintReader implements IFactorioBlueprintReader
         blueprintString = atob(blueprintString); // base64 decode
         blueprintString = pako.inflate(blueprintString, {to: 'string'});
         var blueprintData: BlueprintData = JSON.parse(blueprintString);
-        return {data: blueprintData, version: version};
+        return { data: blueprintData, version: version };
     }
 
-    stringify(blueprintData: any) {
-        var blueprintString = JSON.stringify(blueprintData.data);
+    stringify(blueprintData: { data: BlueprintData, version: string }) {
+        var blueprintString = JSON.stringify(blueprintData);
         blueprintString = pako.deflate(blueprintString, {to: 'string'});
         blueprintString = btoa(blueprintString); // base64 encode
         return blueprintData.version + blueprintString;
