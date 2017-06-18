@@ -136,7 +136,6 @@ interface Window {
     FBR_CANVAS_WIDTH: number;
     FBR_CANVAS_HEIGHT: number;
     FBR_INITIAL_BLUEPRINT: string;
-    FBR_REDRAW_FUNC(): void;
     $: JQueryStatic;
     jQuery: JQueryStatic
 }
