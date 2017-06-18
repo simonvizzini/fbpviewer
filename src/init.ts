@@ -11,7 +11,6 @@ import * as PIXI from "pixi.js";
 const createDropShadowFilter = require("./pixi/createDropShadowFilter");
 
 import FactorioBlueprintReader from "./factorioBlueprintReader";
-import AnimationHandler from "./animationHandler";
 import BlueprintRenderer from "./blueprintRenderer";
 import IconCropper from "./iconCropper";
 import KeyboardHandler from "./keyboardHandler";
@@ -45,14 +44,13 @@ $(function () {
     const factorioBlueprintReader = new FactorioBlueprintReader();
     factorioBlueprintReader.loadEntities();
 
-    const animationHandler = new AnimationHandler();
     const keyboardHandler = new KeyboardHandler();
     const loader = new Loader(factorioBlueprintReader);
 
     const iconCropper = new IconCropper();
     iconCropper.init($("#main-site-container").get(0));
 
-    const blueprintRenderer = new BlueprintRenderer(factorioBlueprintReader, animationHandler, keyboardHandler);
+    const blueprintRenderer = new BlueprintRenderer(factorioBlueprintReader, keyboardHandler);
     blueprintRenderer.on("entityclicked", showEntityDialog);
 
     var stage = new PIXI.Container();
@@ -115,7 +113,7 @@ $(function () {
             function gameLoop() {
                 requestAnimationFrame(gameLoop);
                 zoomAndPanHandler.handleKeyboardPanning();
-                animationHandler.tick();
+                blueprintRenderer.tick();
                 renderer.render(stage);
             }
 

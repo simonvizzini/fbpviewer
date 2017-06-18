@@ -4,16 +4,21 @@ import merge = require("lodash.merge");
 
 const ColorFillShader = require("./pixi/createColorFillShader.js");
 import { IFactorioBlueprintReader } from "./factorioBlueprintReader";
-import { IAnimationHandler } from "./animationHandler";
 import { IKeyboardHandler } from "./keyboardHandler";
+
+type ListenerCallback = (currentSecond: number) => void;
 
 export default class BlueprintRenderer extends EventEmitter {
     private DEFAULT_LAYER = 100;
     private OVERLAY_LAYER = 200;
 
+    // AnimationHandler properties
+    private currentFrame = 0;
+    private currentSecond = 0;
+    private onSecondTickListeners: ListenerCallback[] = [];
+
     constructor(
         private factorioBlueprintReader: IFactorioBlueprintReader,
-        private animationHandler: IAnimationHandler,
         private keyboardHandler: IKeyboardHandler
     ) {
         super();
@@ -30,6 +35,25 @@ export default class BlueprintRenderer extends EventEmitter {
         var B = b >= 0 ? 2 * b : -2 * b - 1;
         var C = (A >= B ? A * A + A + B : A + B * B) / 2;
         return a < 0 && b < 0 || a >= 0 && b >= 0 ? C : -C - 1;
+    }
+
+    clearOnSecondTickListeners() {
+        this.onSecondTickListeners = [];
+    }
+
+    tick() {
+        this.currentFrame++;
+        if (this.currentFrame === 60) {
+            this.onSecondTickListeners.forEach((listener) => {
+                listener(this.currentSecond);
+            });
+            this.currentSecond++;
+            this.currentFrame = 0;
+        }
+    }
+
+    addOnSecondTickListener(listener: ListenerCallback) {
+        this.onSecondTickListeners.push(listener);
     }
 
     private getEntityDrawingSpecForEntity(entity: BlueprintEntity) {
@@ -255,7 +279,7 @@ export default class BlueprintRenderer extends EventEmitter {
                 // if there's more than 4, cycle between them every 2 seconds; also hide if alt is pressed
                 var everyNSeconds = 5;
                 var currentFilterItemNumber = filterItemNumber;
-                this.animationHandler.addOnSecondTickListener((second) => {
+                this.addOnSecondTickListener((second) => {
                     forEach(iconLayers, (layerContainer: PIXI.Container) => {
                         var altPressed = this.keyboardHandler.isPressed(this.keyboardHandler.keys.alt);
                         layerContainer.visible = (!altPressed) && Math.floor(second / everyNSeconds) % (Math.ceil(filters.length / 4)) == Math.floor(currentFilterItemNumber / 4);
@@ -281,7 +305,7 @@ export default class BlueprintRenderer extends EventEmitter {
             maxXY = Math.max(maxXY, x, y);
         });
 
-        var entitiesByYX: {[y:string]: (number[])[]} = {}; // ahem...
+        var entitiesByYX: { [y: string]: (number[])[] } = {}; // ahem...
         var allYCoordinates: number[] = [];
         forEach(entities, (entity: BlueprintEntity, key: number) => {
             // check again, apparently it's always a number already
@@ -401,7 +425,7 @@ export default class BlueprintRenderer extends EventEmitter {
                 yOffset = window.FBR_PIXELS_PER_TILE * (entityDrawingSpec.gridSize as Size).h / 2;
             }
 
-            return {x: x + xOffset, y: y + yOffset};
+            return { x: x + xOffset, y: y + yOffset };
         }
 
         const drawCircuitLine = (fromEntityNumber: number, startPosition: Coords, connection: EntityConnection) => {
